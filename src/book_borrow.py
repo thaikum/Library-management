@@ -1,17 +1,38 @@
 from dbConnect import connection, cursor
 
-def check_previous_borrow(lib_no):
-    pass
+def check_previous_borrow(lib_no, book_no):
+    sql = """
+    --sql
+    SELECT lib_no from book_borrow where lib_no = ? and book_id = ? and is_active = 1
+    ;
+    """
+    active = cursor.execute(sql, [lib_no, book_no]).fetchone()
+    if active:
+        return False
+    else:
+        return True
 
 def new_borrow(lib_no, book_no, date_borrowed, return_date):
-    sql = '''insert into book_borrow(lib_no, book_id, date_borrowed, return_date,is_active)
-            values(?,?,?,?,1)'''
-    success = cursor.execute(sql, [lib_no,book_no,date_borrowed,return_date])
+    if check_previous_borrow(lib_no,book_no):
+        sql = '''insert into book_borrow(lib_no, book_id, date_borrowed, return_date,is_active)
+                values(?,?,?,?,1)'''
+        success = cursor.execute(sql, [lib_no,book_no,date_borrowed,return_date])
+        if success:
+            connection.commit()
+            return True
+
+    return False
+
+def return_book(lib_no, book_no):
+    sql = ''' update book_borrow set is_active = 0 where lib_no = ? and book_id = ? and is_active = 1'''
+    print(lib_no,' ',book_no)
+    success = cursor.execute(sql,[lib_no,book_no])
     if success:
         connection.commit()
         return True
-    else: 
+    else:
         return False
+
 
 def all_borrows():
     sql = '''select bb.lib_no, lb.first_name, lb.second_name, lb.other_name, bb.book_id, bb.date_borrowed, bb.return_date 

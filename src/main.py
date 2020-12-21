@@ -1,5 +1,6 @@
 from PyQt5 import QtWidgets, uic 
-from PyQt5.QtWidgets import QCompleter
+from PyQt5.QtWidgets import QCompleter, QMenu, QAction, QPushButton, QMessageBox
+import qtawesome as qta
 from PyQt5.QtCore import Qt
 import sys
 import time
@@ -8,7 +9,7 @@ from datetime import datetime as dt
 from lib_user import add_lib_user, all_students, all_staff
 from book import new_book, all_books
 from helper import search_lib_user, search_book, list_to_string
-from book_borrow import new_borrow, all_borrows
+from book_borrow import new_borrow, all_borrows, return_book
 
 class Ui(QtWidgets.QMainWindow):
 	can_borrow = False
@@ -18,11 +19,15 @@ class Ui(QtWidgets.QMainWindow):
 		self.ui = uic.loadUi('./UI/main2.ui',self)
 
 		#tab navigators
-		self.ui.btnBooks.clicked.connect(lambda : self.ui.pages.setCurrentWidget(self.ui.pgBooks))
-		self.ui.btnLibSession.clicked.connect(lambda : self.ui.pages.setCurrentWidget(self.ui.pgLibSession))
-		self.ui.btnStudents.clicked.connect(lambda : self.ui.pages.setCurrentWidget(self.ui.pgStudents))
-		self.ui.btnStaff.clicked.connect(lambda : self.ui.pages.setCurrentWidget(self.ui.pgStaff))
+		self.previousButton = self.btnLibSession
 
+		self.activeButton(self.btnLibSession)#default page
+
+		self.ui.btnBooks.clicked.connect(lambda: self.activeButton(self.btnBooks) )
+		self.ui.btnLibSession.clicked.connect(lambda: self.activeButton(self.btnLibSession))
+		self.ui.btnStudents.clicked.connect(lambda: self.activeButton(self.btnStudents))
+		self.ui.btnStaff.clicked.connect(lambda: self.activeButton(self.btnStaff))
+		
 		#============================== Saving data to the database ===============================
 		self.ui.btnSaveStd.clicked.connect(self.new_student)
 		self.ui.stfSaveDetails.clicked.connect(self.new_staff)
@@ -45,7 +50,18 @@ class Ui(QtWidgets.QMainWindow):
 		#==================== ui text initialization =====================
 		self.show_book_borrow_error('')
 
-		self.show()
+		#====================== context menu =========================
+		self.ui.tblBorrow.customContextMenuRequested.connect(self.borrow_table_menu)
+		self.ui.tblBooks.customContextMenuRequested.connect(self.book_table_menu)
+
+		#======================= setting icons =========================
+		self.btnBooks.setIcon(self.icon('fa5s.book',scale = 1.3))
+		self.btnLibSession.setIcon(self.icon('fa5s.book-reader', scale = 1.3))
+		self.btnStudents.setIcon(self.icon('fa5s.user-graduate',scale = 1.3))
+		self.btnStaff.setIcon(self.icon('fa5s.user-secret',scale = 1.3))
+
+		#====================================================================
+		self.showMaximized()
 
 	def new_student(self):
 		ui = self.ui
@@ -102,7 +118,8 @@ class Ui(QtWidgets.QMainWindow):
 		if success:
 			self.populate_borrow_book_table()
 			self.btnClearBookBorrow.click()
-
+		else:
+			self.error_message('Return the previous book first',"Invalid")
 		
 	def populate_student_table(self):
 		ui = self.ui
@@ -153,7 +170,6 @@ class Ui(QtWidgets.QMainWindow):
 			row += 1
 		table.resizeColumnsToContents()
 
-	
 	def validate_lib_user(self):
 		ui = self.ui
 		lib_no = ui.txtLibNoBorrow.text().upper()
@@ -201,6 +217,69 @@ class Ui(QtWidgets.QMainWindow):
 		completer = QCompleter(data)
 		completer.setCaseSensitivity(Qt.CaseInsensitive)
 		lineedit.setCompleter(completer)
+
+	def borrow_table_menu(self, position):
+		menu = QMenu()
+		removeRow = menu.addAction("Set Returned")
+		removeIcon = qta.icon('fa5.check-circle')
+		removeRow.setIcon(removeIcon)
+		action = menu.exec_(self.ui.tblBorrow.mapToGlobal(position))
+		if action == removeRow:
+			self.book_return()
+
+	def book_table_menu(self, position):
+		menu = QMenu()
+		menu.setStyleSheet('font-weight:bold;font-size:13px;')
+		removeRow = menu.addAction("Remove Book")
+		removeRow.setIcon(qta.icon('fa5.check-circle'))
+		editRecord = menu.addAction('Edit details')
+		editRecord.setIcon(qta.icon('fa5.edit'))
+		action = menu.exec_(self.ui.tblBooks.mapToGlobal(position))
+
+		if action == editRecord:
+			self.edit_books()
+
+	def icon(self, icon_name, color = 'white', scale = 1):
+		return qta.icon(icon_name,color = color, scale_factor = scale)
+	
+	def activeButton(self, currentButton):
+		if currentButton.objectName() == 'btnLibSession':
+			self.pages.setCurrentWidget(self.pgLibSession)
+		elif currentButton.objectName() == 'btnBooks':
+			self.pages.setCurrentWidget(self.pgBooks)
+		elif currentButton.objectName() == 'btnStudents':
+			self.pages.setCurrentWidget(self.pgStudents)
+		elif currentButton.objectName() == 'btnStaff':
+			self.pages.setCurrentWidget(self.pgStaff)
+
+		self.previousButton.setStyleSheet('padding-left:10px;\npadding-right:5px;')
+
+		currentButton.setStyleSheet('padding-left:10px;\nborder:none;\npadding-right:5px;')
+		self.previousButton = currentButton
+
+	def book_return(self):
+		lib_no = self.tblBorrow.item(self.tblBorrow.currentRow(),0).text()
+		book_no = self.tblBorrow.item(self.tblBorrow.currentRow(),2).text()
+		success = return_book(lib_no, book_no)
+		if success:
+			self.populate_borrow_book_table()
+
+	def edit_books(self):
+		row = self.tblBooks.currentRow()
+		book_id = self.tblBooks.item(row,0).text()
+		book_name = self.tblBooks.item(row,1).text()
+		book_category = self.tblBooks.item(row,2).text()
+		date_added = self.tblBooks.item(row,3).text()
+
+		self.bookIdDetails.setText(book_id)
+		self.bookNameDetails.setText(book_name)
+		self.dayBookAdded.setDate(dt.strptime(date_added, '%Y-%m-%d'))
+		self.cmbBookCategory.setCurrentText(book_category.capitalize())
+
+	def error_message(self,message,box_title):
+		msg = QMessageBox(QMessageBox.Critical, box_title ,message)
+		msg.setStyleSheet('background-color:#800000;color:white;font-size:15px')
+		msg.exec_()
 
 app = QtWidgets.QApplication(sys.argv)
 window = Ui()
