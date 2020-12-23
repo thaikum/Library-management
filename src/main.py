@@ -1,5 +1,6 @@
 from PyQt5 import QtWidgets, uic 
 from PyQt5.QtWidgets import QCompleter, QMenu, QAction, QPushButton, QMessageBox
+from PyQt5.QtGui import QIntValidator
 import qtawesome as qta
 from PyQt5.QtCore import Qt
 import sys
@@ -7,9 +8,9 @@ import time
 from datetime import datetime as dt
 
 from lib_user import add_lib_user, all_students, all_staff
-from book import new_book, all_books
+from book import new_book, all_books, blacklist, unblacklist
 from helper import search_lib_user, search_book, list_to_string
-from book_borrow import new_borrow, all_borrows, return_book
+from book_borrow import new_borrow, all_borrows, return_book, is_blacklisted
 
 class Ui(QtWidgets.QMainWindow):
 	can_borrow = False
@@ -44,8 +45,9 @@ class Ui(QtWidgets.QMainWindow):
 		self.txtLibNoBorrow.editingFinished.connect(self.validate_lib_user)
 		self.txtBookIdBorrow.editingFinished.connect(self.validate_book)
 
-		#================= Minimum dat =======================
+		#================= Minimum date =======================
 		self.ui.dtReturnDateBorrow.setMinimumDate(dt.today())
+		self.ui.dayBookAdded.setMinimumDate(dt.today())
 
 		#==================== ui text initialization =====================
 		self.show_book_borrow_error('')
@@ -59,8 +61,17 @@ class Ui(QtWidgets.QMainWindow):
 		self.btnLibSession.setIcon(self.icon('fa5s.book-reader', scale = 1.3))
 		self.btnStudents.setIcon(self.icon('fa5s.user-graduate',scale = 1.3))
 		self.btnStaff.setIcon(self.icon('fa5s.user-secret',scale = 1.3))
+		spin_icon = qta.icon('fa5s.cog', color='white', animation = qta.Spin(self.btnSettings))
+		self.btnSettings.setIcon(spin_icon)
+
+		#====================== additional ui customisation ========================
+		self.btnSettings.setStyleSheet('background-color:none;border:none;width:10px')
+		self.btnSettings.setText('')
+		self.btnSettings.setStatusTip('Settings')
 
 		#====================================================================
+		style = open('./UI/style.qss','r').read()
+		self.centralwidget.setStyleSheet(style)
 		self.showMaximized()
 
 	def new_student(self):
@@ -105,7 +116,8 @@ class Ui(QtWidgets.QMainWindow):
 			if success:
 				self.clearBookDetails.click()
 				self.populate_book_table()
-
+			else:
+				self.error_message('A book with such details exists','Book exists!')
 	def new_book_borrow(self):
 		ui = self.ui
 		lib_no = ui.txtLibNoBorrow.text().upper()
@@ -115,11 +127,14 @@ class Ui(QtWidgets.QMainWindow):
 
 		success = new_borrow(lib_no, book_id, today, return_date)
 
-		if success:
+		if success == 'blacklisted':
+			self.error_message('The book is currently blacklisted',"Blacklisted")
+		elif success == 'active':
+			self.error_message('Return the previous book first',"Invalid")
+		else:
 			self.populate_borrow_book_table()
 			self.btnClearBookBorrow.click()
-		else:
-			self.error_message('Return the previous book first',"Invalid")
+		
 		
 	def populate_student_table(self):
 		ui = self.ui
@@ -219,10 +234,14 @@ class Ui(QtWidgets.QMainWindow):
 		lineedit.setCompleter(completer)
 
 	def borrow_table_menu(self, position):
+		
 		menu = QMenu()
+		menu.setTitle("hello world")
 		removeRow = menu.addAction("Set Returned")
 		removeIcon = qta.icon('fa5.check-circle')
 		removeRow.setIcon(removeIcon)
+		removeRow.setShortcut('ctrl+r')
+		
 		action = menu.exec_(self.ui.tblBorrow.mapToGlobal(position))
 		if action == removeRow:
 			self.book_return()
@@ -234,10 +253,23 @@ class Ui(QtWidgets.QMainWindow):
 		removeRow.setIcon(qta.icon('fa5.check-circle'))
 		editRecord = menu.addAction('Edit details')
 		editRecord.setIcon(qta.icon('fa5.edit'))
+		menu.addSeparator()
+		book_id = self.tblBooks.item(self.tblBooks.currentRow(),0).text()
+		if is_blacklisted(book_id):
+			menu.addAction(qta.icon('fa5s.lock-open',color = 'red'),"ublacklist",lambda: self.unblacklist(book_id),'ctrl+u')
+		else:
+			menu.addAction(qta.icon('fa5s.ban',color = 'red'),"blacklist",lambda:self.blacklist(book_id),'ctrl+l')
+			
 		action = menu.exec_(self.ui.tblBooks.mapToGlobal(position))
 
 		if action == editRecord:
 			self.edit_books()
+
+	def blacklist(self,book_id):
+		pass
+	def unblacklist(self,book_id):
+		print("kkk")
+		unblacklist(book_id)
 
 	def icon(self, icon_name, color = 'white', scale = 1):
 		return qta.icon(icon_name,color = color, scale_factor = scale)
@@ -251,11 +283,14 @@ class Ui(QtWidgets.QMainWindow):
 			self.pages.setCurrentWidget(self.pgStudents)
 		elif currentButton.objectName() == 'btnStaff':
 			self.pages.setCurrentWidget(self.pgStaff)
+		elif currentButton.objectName() == 'btnSettings':
+			pass
 
-		self.previousButton.setStyleSheet('padding-left:10px;\npadding-right:5px;')
+		if currentButton.objectName() != 'btnSettings':
+			self.previousButton.setStyleSheet('padding-left:10px;\npadding-right:5px;')
 
-		currentButton.setStyleSheet('padding-left:10px;\nborder:none;\npadding-right:5px;')
-		self.previousButton = currentButton
+			currentButton.setStyleSheet('padding-left:10px;\nborder:none;\npadding-right:5px;')
+			self.previousButton = currentButton
 
 	def book_return(self):
 		lib_no = self.tblBorrow.item(self.tblBorrow.currentRow(),0).text()

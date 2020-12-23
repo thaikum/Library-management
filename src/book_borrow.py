@@ -12,16 +12,36 @@ def check_previous_borrow(lib_no, book_no):
     else:
         return True
 
-def new_borrow(lib_no, book_no, date_borrowed, return_date):
-    if check_previous_borrow(lib_no,book_no):
-        sql = '''insert into book_borrow(lib_no, book_id, date_borrowed, return_date,is_active)
-                values(?,?,?,?,1)'''
-        success = cursor.execute(sql, [lib_no,book_no,date_borrowed,return_date])
-        if success:
-            connection.commit()
-            return True
+def is_blacklisted(book_id):
+    sql = """
+    --sql
+    SELECT book_id from blacklisted_books where book_id = ?
+    ;
+    """
+    blacklisted = cursor.execute(sql, [book_id]).fetchone()
+    if blacklisted:
+        return True
+    else:
+        return False
 
-    return False
+    
+def new_borrow(lib_no, book_no, date_borrowed, return_date):
+    if not is_blacklisted(book_no):
+        print('hello world')
+        if check_previous_borrow(lib_no,book_no):
+            sql = '''insert into book_borrow(lib_no, book_id, date_borrowed, return_date,is_active)
+                    values(?,?,?,?,1)'''
+            success = cursor.execute(sql, [lib_no,book_no,date_borrowed,return_date])
+            if success:
+                connection.commit()
+                return True
+
+            return False
+        else:
+            return "active"
+    else:
+        return "blacklisted"
+    
 
 def return_book(lib_no, book_no):
     sql = ''' update book_borrow set is_active = 0 where lib_no = ? and book_id = ? and is_active = 1'''

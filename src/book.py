@@ -4,14 +4,40 @@ def new_book(book_id, book_name, date_added, book_category):
     sql = '''insert into book(book_id,book_name,date_added,book_category)
                 values(?,?,?,?)'''
     
-    output = cursor.execute(sql,[book_id,book_name,date_added,book_category])
-
-    if output:
+    try:
+        output = cursor.execute(sql,[book_id,book_name,date_added,book_category])
+        if output:
+            connection.commit()
+        return True
+    except:
+        return False
+    
+def blacklist(book_id,reason):
+    sql = """
+    --sql
+    insert into blacklisted_book(book_id) values(?,?)
+    ;
+    """
+    try:
+        cursor.execute(sql, [book_id,reason])
         connection.commit()
         return True
-    else:
+    except:
         return False
 
+def unblacklist(book_id):
+    sql = """
+    --sql
+    delete from blacklisted_books where book_id = ?
+    ;
+    """
+    
+    try:
+        cursor.execute(sql,[book_id])
+        connection.commit()
+        return True
+    except:
+        return False
 def book_update(book_id,book_name, date_added, book_category):
     sql = '''update book set book_name = ?, date_added = ?, book_category = ? where book_id = ?'''
 
