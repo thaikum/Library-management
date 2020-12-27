@@ -1,320 +1,517 @@
-from PyQt5 import QtWidgets, uic 
-from PyQt5.QtWidgets import QCompleter, QMenu, QAction, QPushButton, QMessageBox
-from PyQt5.QtGui import QIntValidator
-import qtawesome as qta
-from PyQt5.QtCore import Qt
+import hashlib
 import sys
 import time
-from datetime import datetime as dt
+import uuid
+import bcrypt
 
-from lib_user import add_lib_user, all_students, all_staff
-from book import new_book, all_books, blacklist, unblacklist
-from helper import search_lib_user, search_book, list_to_string
-from book_borrow import new_borrow, all_borrows, return_book, is_blacklisted
+import qtawesome as qta
+from PyQt5 import QtWidgets, uic
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import *
+
+from src.book import new_book, blacklist, unblacklist
+from src.book_borrow import new_borrow, all_borrows, return_book, is_blacklisted, range_selection, \
+    range_selection_by_date, \
+    borrowing_history
+from src.helper import *
+from src.lib_user import add_lib_user, create_admin, login_admin
+
+
+class ChangePassword(QDialog):
+    def __init__(self, *args, **kwargs):
+        super(ChangePassword, self).__init__(*args, **kwargs)
+        self.ui = uic.loadUi('../UI/passwordchange.ui', self)
+
+
+class UpdateProfile(QDialog):
+    def __init__(self, *args, **kwargs):
+        super(UpdateProfile, self).__init__(*args, **kwargs)
+        self.ui = uic.loadUi('../UI/updateprofile.ui', self)
+
+
+class BlacklistReason(QDialog):
+    def __init__(self, *args, **kwargs):
+        super(BlacklistReason, self).__init__(*args, **kwargs)
+        self.ui = uic.loadUi('../UI/BlacklistingDialog.ui', self)
+
+
+class Login(QDialog):
+    def __init__(self, *args, **kwargs):
+        super(Login, self).__init__(*args, **kwargs)
+        self.ui = uic.loadUi('../UI/login.ui', self)
+        self.btnLogin.clicked.connect(self.authenticate)
+
+    def authenticate(self):
+        lib_no = self.loginLibNo.text().upper()
+        password = hashlib.pbkdf2_hmac("sha256", self.loginPassword.text().encode(), lib_no.encode(), 100000).hex()
+        success = login_admin(lib_no, password)
+        if success:
+            self.accept()
+        else:
+            self.errorLabel.setStyleSheet('background-color:white; color:red')
+            self.errorLabel.setText("Invalid login credentials")
+
 
 class Ui(QtWidgets.QMainWindow):
-	can_borrow = False
+    can_borrow = False
+    global_book_list = []
+    global_book_borrow_list = []
+    global_staff_list = []
 
-	def __init__(self):
-		super(Ui, self).__init__()
-		self.ui = uic.loadUi('./UI/main2.ui',self)
+    def __init__(self):
+        super(Ui, self).__init__()
+        self.ui = uic.loadUi('../UI/main2.ui', self)
 
-		#tab navigators
-		self.previousButton = self.btnLibSession
+        # ================================== login ================================
+        self.login()
 
-		self.activeButton(self.btnLibSession)#default page
+        # ============================= tab navigators ===========================
+        self.previousButton = self.btnLibSession
 
-		self.ui.btnBooks.clicked.connect(lambda: self.activeButton(self.btnBooks) )
-		self.ui.btnLibSession.clicked.connect(lambda: self.activeButton(self.btnLibSession))
-		self.ui.btnStudents.clicked.connect(lambda: self.activeButton(self.btnStudents))
-		self.ui.btnStaff.clicked.connect(lambda: self.activeButton(self.btnStaff))
-		
-		#============================== Saving data to the database ===============================
-		self.ui.btnSaveStd.clicked.connect(self.new_student)
-		self.ui.stfSaveDetails.clicked.connect(self.new_staff)
-		self.ui.btnSaveBook.clicked.connect(self.add_new_book)
-		self.ui.btnBorrowBook.clicked.connect(self.new_book_borrow)
+        self.activeButton(self.btnLibSession)  # default page
 
-		#====================populate tables ============================================
-		self.populate_student_table()
-		self.populate_staff_table()
-		self.populate_book_table()
-		self.populate_borrow_book_table()
+        self.ui.btnBooks.clicked.connect(lambda: self.activeButton(self.btnBooks))
+        self.ui.btnLibSession.clicked.connect(lambda: self.activeButton(self.btnLibSession))
+        self.ui.btnStudents.clicked.connect(lambda: self.activeButton(self.btnStudents))
+        self.ui.btnStaff.clicked.connect(lambda: self.activeButton(self.btnStaff))
+        self.ui.btnSettings.clicked.connect(lambda: self.activeButton(self.btnSettings))
+        self.ui.btnReport.clicked.connect(lambda: self.activeButton(self.btnReport))
 
-		#================== Some constraints to enable/disable buttons ==================
-		self.txtLibNoBorrow.editingFinished.connect(self.validate_lib_user)
-		self.txtBookIdBorrow.editingFinished.connect(self.validate_book)
+        # ============================== Saving data to the database ===============================
+        self.ui.btnSaveStd.clicked.connect(self.new_student)
+        self.ui.stfSaveDetails.clicked.connect(self.new_staff)
+        self.ui.btnSaveBook.clicked.connect(self.add_new_book)
+        self.ui.btnBorrowBook.clicked.connect(self.new_book_borrow)
 
-		#================= Minimum date =======================
-		self.ui.dtReturnDateBorrow.setMinimumDate(dt.today())
-		self.ui.dayBookAdded.setMinimumDate(dt.today())
+        # ====================populate tables =====================================================
+        self.populate_student_table()
+        self.populate_staff_table()
+        self.populate_book_table()
+        self.populate_borrow_book_table()
 
-		#==================== ui text initialization =====================
-		self.show_book_borrow_error('')
+        # ================== Some constraints to enable/disable buttons ===========================
+        self.txtLibNoBorrow.editingFinished.connect(self.validate_lib_user)
+        self.txtBookIdBorrow.editingFinished.connect(self.validate_book)
 
-		#====================== context menu =========================
-		self.ui.tblBorrow.customContextMenuRequested.connect(self.borrow_table_menu)
-		self.ui.tblBooks.customContextMenuRequested.connect(self.book_table_menu)
+        # ================= Minimum date =========================================================
+        self.ui.dtReturnDateBorrow.setMinimumDate(dt.today())
+        self.ui.dayBookAdded.setMinimumDate(dt.today())
 
-		#======================= setting icons =========================
-		self.btnBooks.setIcon(self.icon('fa5s.book',scale = 1.3))
-		self.btnLibSession.setIcon(self.icon('fa5s.book-reader', scale = 1.3))
-		self.btnStudents.setIcon(self.icon('fa5s.user-graduate',scale = 1.3))
-		self.btnStaff.setIcon(self.icon('fa5s.user-secret',scale = 1.3))
-		spin_icon = qta.icon('fa5s.cog', color='white', animation = qta.Spin(self.btnSettings))
-		self.btnSettings.setIcon(spin_icon)
+        # ==================== ui text initialization ===========================================
+        self.show_book_borrow_error('')
 
-		#====================== additional ui customisation ========================
-		self.btnSettings.setStyleSheet('background-color:none;border:none;width:10px')
-		self.btnSettings.setText('')
-		self.btnSettings.setStatusTip('Settings')
+        # ====================== context menu ========================================
+        self.ui.tblBorrow.customContextMenuRequested.connect(self.borrow_table_menu)
+        self.ui.tblBooks.customContextMenuRequested.connect(self.book_table_menu)
+        self.ui.tblReport.customContextMenuRequested.connect(self.report_table_menu)
+        self.ui.tblStaff.customContextMenuRequested.connect(self.staff_table_menu)
 
-		#====================================================================
-		style = open('./UI/style.qss','r').read()
-		self.centralwidget.setStyleSheet(style)
-		self.showMaximized()
+        # ======================= setting icons ======================================
+        self.btnBooks.setIcon(self.icon('fa5s.book', scale=1.3))
+        self.btnLibSession.setIcon(self.icon('fa5s.book-reader', scale=1.3))
+        self.btnStudents.setIcon(self.icon('fa5s.user-graduate', scale=1.3))
+        self.btnStaff.setIcon(self.icon('fa5s.user-secret', scale=1.3))
+        spin_icon = qta.icon('fa5s.cog', color='white', animation=qta.Spin(self.btnSettings))
+        self.btnSettings.setIcon(spin_icon)
+        self.btnUsers.setIcon(self.icon('fa5s.user'))
 
-	def new_student(self):
-		ui = self.ui
+        # ====================== additional ui customisation ========================
+        self.btnSettings.setText('')
+        self.btnSettings.setToolTip('Settings')
 
-		fname = ui.txtStdFname.text().upper()
-		sname = ui.txtStdSname.text().upper()
-		oname = ui.txtStdOname.text().upper()
-		user_type = 'STUDENT'
-		std_class = ui.txtStdClass.text()
-		stream = ui.txtStdStream.text().upper()
+        self.btnUsers.setText('')
 
-		details = add_lib_user(fname, sname,oname, user_type , std_class = std_class, stream = stream)
+        # =======================vertical box ======================================
+        self.mywidget = QWidget()
+        self.graphScroll.setWidget(self.mywidget)
+        self.vbox = QVBoxLayout()
+        self.mywidget.setLayout(self.vbox)
+        self.mywidget.setMaximumHeight(16777215)
+        # ====================== search functionallity ==============================
+        self.txtBookSearch.setPlaceholderText('Search...')
+        self.txtBorrowSearch.setPlaceholderText('Search...')
+        self.txtStaffSearch.setPlaceholderText('Search...')
+        self.txtStudentSearch.setPlaceholderText('Search...')
 
-		if details:
-			ui.clearStudentDetails.click()
-			self.populate_student_table()
+        self.txtBookSearch.textChanged.connect(
+            lambda: self.insert_into_table(self.tblBooks, search(self.global_book_list, self.txtBookSearch.text())))
+        self.txtBorrowSearch.textChanged.connect(lambda: self.insert_into_table(self.tblBorrow,
+                                                                                search(self.global_book_borrow_list,
+                                                                                       self.txtBorrowSearch.text())))
+        self.txtStaffSearch.textChanged.connect(
+            lambda: self.insert_into_table(self.tblStaff, search(self.global_staff_list, self.txtStaffSearch.text())))
+        self.txtStudentSearch.textChanged.connect(lambda: self.insert_into_table(self.tblStudent,
+                                                                                 search(self.global_student_list,
+                                                                                        self.txtStudentSearch.text())))
 
-	def new_staff(self):
-		ui = self.ui 
+        # =================================== Menu buttons ===============================
+        self.btnUsers.setMenu(self.update_profile_menu())
 
-		fname = ui.stfFirstName.text().upper()
-		sname = ui.stfSecondName.text().upper()
-		oname = ui.stfOtherName.text().upper()
-		user_type = 'STAFF'
-		phone_no = ui.stfPhoneNo.text()
+        # ================================= report =============================================
+        self.generateRangeReport.clicked.connect(self.range_report)
+        # =================================================================================
+        self.showMaximized()
 
-		details = add_lib_user(fname,sname,oname,user_type, phone_no = phone_no)
+    def new_student(self):
+        ui = self.ui
 
-		if details:
-			ui.clearStaffDetails.click()
-			self.populate_staff_table()
+        fname = ui.txtStdFname.text().upper()
+        sname = ui.txtStdSname.text().upper()
+        oname = ui.txtStdOname.text().upper()
+        user_type = 'STUDENT'
+        std_class = ui.txtStdClass.text()
+        stream = ui.txtStdStream.text().upper()
 
-	def add_new_book(self):
-			book_id = self.bookIdDetails.text().upper()
-			book_name = self.bookNameDetails.text().upper()
-			date_added = self.dayBookAdded.date().toPyDate()
-			book_category = self.cmbBookCategory.currentText().upper()
+        details = add_lib_user(fname, sname, oname, user_type, std_class=std_class, stream=stream)
 
-			success = new_book(book_id,book_name,date_added,book_category)
+        if details:
+            ui.clearStudentDetails.click()
+            self.populate_student_table()
 
-			if success:
-				self.clearBookDetails.click()
-				self.populate_book_table()
-			else:
-				self.error_message('A book with such details exists','Book exists!')
-	def new_book_borrow(self):
-		ui = self.ui
-		lib_no = ui.txtLibNoBorrow.text().upper()
-		book_id = ui.txtBookIdBorrow.text().upper()
-		return_date = ui.dtReturnDateBorrow.date().toPyDate()
-		today = time.strftime('%Y-%m-%d')
+    def new_staff(self):
+        ui = self.ui
 
-		success = new_borrow(lib_no, book_id, today, return_date)
+        fname = ui.stfFirstName.text().upper()
+        sname = ui.stfSecondName.text().upper()
+        oname = ui.stfOtherName.text().upper()
+        user_type = 'STAFF'
+        phone_no = ui.stfPhoneNo.text()
 
-		if success == 'blacklisted':
-			self.error_message('The book is currently blacklisted',"Blacklisted")
-		elif success == 'active':
-			self.error_message('Return the previous book first',"Invalid")
-		else:
-			self.populate_borrow_book_table()
-			self.btnClearBookBorrow.click()
-		
-		
-	def populate_student_table(self):
-		ui = self.ui
-		self.clear_table(ui.tblStudent)
-		
-		students = all_students()
+        details = add_lib_user(fname, sname, oname, user_type, phone_no=phone_no)
 
-		self.insert_into_table(ui.tblStudent, students)
-		
-	def populate_staff_table(self):
-		ui = self.ui
-		self.clear_table(ui.tblStaff)
-		staff = all_staff()
+        if details:
+            ui.clearStaffDetails.click()
+            self.populate_staff_table()
 
-		self.insert_into_table(ui.tblStaff, staff)
-		self.autocomplete(ui.txtLibNoBorrow,list_to_string(staff,0) )
+    def add_new_book(self):
+        book_id = self.bookIdDetails.text().upper()
+        book_name = self.bookNameDetails.text().upper()
+        date_added = self.dayBookAdded.date().toPyDate()
+        book_category = self.cmbBookCategory.currentText().upper()
 
-	def populate_book_table(self):
-		ui = self.ui
-		self.clear_table(ui.tblBooks)
+        success = new_book(book_id, book_name, date_added, book_category)
 
-		books = all_books()
-		self.autocomplete(ui.txtBookIdBorrow, list_to_string(books,0) )
-		self.insert_into_table(ui.tblBooks,books)
-	
-	def populate_borrow_book_table(self):
-		ui = self.ui
-		self.clear_table(ui.tblBorrow)
-		borrows = all_borrows()
+        if success:
+            self.clearBookDetails.click()
+            self.populate_book_table()
+        else:
+            self.error_message('A book with such details exists', 'Book exists!')
 
-		self.insert_into_table(ui.tblBorrow, borrows)
+    def new_book_borrow(self):
+        ui = self.ui
+        lib_no = ui.txtLibNoBorrow.text().upper()
+        book_id = ui.txtBookIdBorrow.text().upper()
+        return_date = ui.dtReturnDateBorrow.date().toPyDate()
+        today = time.strftime('%Y-%m-%d')
 
-	def clear_table(self, table):
-		size = table.rowCount() - 1 
-		while size >= 0 :
-			table.removeRow(size)
-			size-=1
+        success = new_borrow(lib_no, book_id, today, return_date)
 
-	def insert_into_table(self,table,details):
-		row = 0
-		for detail in details:
-			table.insertRow(row)
-			column = 0
-			for data in detail:
-				data = QtWidgets.QTableWidgetItem(data)
-				table.setItem(row,column,data)
-				column += 1
-			row += 1
-		table.resizeColumnsToContents()
+        if success == 'blacklisted':
+            self.error_message('The book is currently blacklisted', "Blacklisted")
+        elif success == 'active':
+            self.error_message('Return the previous book first', "Invalid")
+        else:
+            self.populate_borrow_book_table()
+            self.btnClearBookBorrow.click()
 
-	def validate_lib_user(self):
-		ui = self.ui
-		lib_no = ui.txtLibNoBorrow.text().upper()
-		lib_user_exists = search_lib_user(lib_no)
-		if lib_user_exists:
-			name = lib_user_exists[1]
-			ui.txtUserNameBorrow.setText(name)
-			self.activate_borrow_button()
-		else:
-			self.can_borrow = False
-			ui.txtUserNameBorrow.clear()
-			self.show_book_borrow_error('Please ensure that all data provided is correct!!!')
-			ui.btnBorrowBook.setEnabled(False)
+    def populate_student_table(self):
+        ui = self.ui
 
-	def validate_book(self):
-		ui = self.ui
-		book_id = ui.txtBookIdBorrow.text().upper()
-		book_available = search_book(book_id)
-		if book_available:
-			ui.txtBookNameBorrow.setText(book_available[1])
-			self.activate_borrow_button()
-		else:
-			self.can_borrow = False
-			ui.txtBookNameBorrow.clear()
-			self.show_book_borrow_error('Please ensure that all data provided is correct !!!')
-			ui.btnBorrowBook.setEnabled(False)
-			
-	def activate_borrow_button(self):
-		if self.can_borrow:
-			self.ui.btnBorrowBook.setEnabled(True)
-			self.show_book_borrow_error('')
-		else:
-			self.show_book_borrow_error('Please ensure that all data provided is correct !!!')
-			self.can_borrow = True
+        students = all_students()
+        self.global_student_list = students
 
-	def show_book_borrow_error(self, error):
-		if error:
-			self.ui.lblBookBorrowError.setStyleSheet('color:red;\nbackground-color:white;\nborder-radius:4px;')
-			self.ui.lblBookBorrowError.setText(error)
-		else:
-			self.ui.lblBookBorrowError.setStyleSheet('')
-			self.ui.lblBookBorrowError.setText('')
+        self.insert_into_table(ui.tblStudent, students)
 
-	def autocomplete(self, lineedit,data):
-		completer = QCompleter(data)
-		completer.setCaseSensitivity(Qt.CaseInsensitive)
-		lineedit.setCompleter(completer)
+    def populate_staff_table(self):
+        ui = self.ui
+        staff = all_staff()
+        self.global_staff_list = staff
 
-	def borrow_table_menu(self, position):
-		
-		menu = QMenu()
-		menu.setTitle("hello world")
-		removeRow = menu.addAction("Set Returned")
-		removeIcon = qta.icon('fa5.check-circle')
-		removeRow.setIcon(removeIcon)
-		removeRow.setShortcut('ctrl+r')
-		
-		action = menu.exec_(self.ui.tblBorrow.mapToGlobal(position))
-		if action == removeRow:
-			self.book_return()
+        self.insert_into_table(ui.tblStaff, staff)
+        self.autocomplete(ui.txtLibNoBorrow, list_to_string(staff, 0))
 
-	def book_table_menu(self, position):
-		menu = QMenu()
-		menu.setStyleSheet('font-weight:bold;font-size:13px;')
-		removeRow = menu.addAction("Remove Book")
-		removeRow.setIcon(qta.icon('fa5.check-circle'))
-		editRecord = menu.addAction('Edit details')
-		editRecord.setIcon(qta.icon('fa5.edit'))
-		menu.addSeparator()
-		book_id = self.tblBooks.item(self.tblBooks.currentRow(),0).text()
-		if is_blacklisted(book_id):
-			menu.addAction(qta.icon('fa5s.lock-open',color = 'red'),"ublacklist",lambda: self.unblacklist(book_id),'ctrl+u')
-		else:
-			menu.addAction(qta.icon('fa5s.ban',color = 'red'),"blacklist",lambda:self.blacklist(book_id),'ctrl+l')
-			
-		action = menu.exec_(self.ui.tblBooks.mapToGlobal(position))
+    def populate_book_table(self):
+        ui = self.ui
 
-		if action == editRecord:
-			self.edit_books()
+        books = all_books()
+        self.global_book_list = books
 
-	def blacklist(self,book_id):
-		pass
-	def unblacklist(self,book_id):
-		print("kkk")
-		unblacklist(book_id)
+        self.autocomplete(ui.txtBookIdBorrow, list_to_string(books, 0))
+        self.insert_into_table(ui.tblBooks, books)
 
-	def icon(self, icon_name, color = 'white', scale = 1):
-		return qta.icon(icon_name,color = color, scale_factor = scale)
-	
-	def activeButton(self, currentButton):
-		if currentButton.objectName() == 'btnLibSession':
-			self.pages.setCurrentWidget(self.pgLibSession)
-		elif currentButton.objectName() == 'btnBooks':
-			self.pages.setCurrentWidget(self.pgBooks)
-		elif currentButton.objectName() == 'btnStudents':
-			self.pages.setCurrentWidget(self.pgStudents)
-		elif currentButton.objectName() == 'btnStaff':
-			self.pages.setCurrentWidget(self.pgStaff)
-		elif currentButton.objectName() == 'btnSettings':
-			pass
+    def populate_borrow_book_table(self):
+        ui = self.ui
+        borrows = all_borrows()
+        self.global_book_borrow_list = borrows
+        self.set_min_and_max_date()
 
-		if currentButton.objectName() != 'btnSettings':
-			self.previousButton.setStyleSheet('padding-left:10px;\npadding-right:5px;')
+        self.insert_into_table(ui.tblBorrow, borrows)
 
-			currentButton.setStyleSheet('padding-left:10px;\nborder:none;\npadding-right:5px;')
-			self.previousButton = currentButton
+    def clear_table(self, table):
+        size = table.rowCount() - 1
+        while size >= 0:
+            table.removeRow(size)
+            size -= 1
 
-	def book_return(self):
-		lib_no = self.tblBorrow.item(self.tblBorrow.currentRow(),0).text()
-		book_no = self.tblBorrow.item(self.tblBorrow.currentRow(),2).text()
-		success = return_book(lib_no, book_no)
-		if success:
-			self.populate_borrow_book_table()
+    def insert_into_table(self, table, details):
+        self.clear_table(table)
 
-	def edit_books(self):
-		row = self.tblBooks.currentRow()
-		book_id = self.tblBooks.item(row,0).text()
-		book_name = self.tblBooks.item(row,1).text()
-		book_category = self.tblBooks.item(row,2).text()
-		date_added = self.tblBooks.item(row,3).text()
+        row = 0
+        for detail in details:
+            table.insertRow(row)
+            column = 0
+            for data in detail:
+                data = QtWidgets.QTableWidgetItem(str(data))
+                table.setItem(row, column, data)
+                column += 1
+            row += 1
+        table.resizeColumnsToContents()
 
-		self.bookIdDetails.setText(book_id)
-		self.bookNameDetails.setText(book_name)
-		self.dayBookAdded.setDate(dt.strptime(date_added, '%Y-%m-%d'))
-		self.cmbBookCategory.setCurrentText(book_category.capitalize())
+    def validate_lib_user(self):
+        ui = self.ui
+        lib_no = ui.txtLibNoBorrow.text().upper()
+        lib_user_exists = search_lib_user(lib_no)
+        if lib_user_exists:
+            name = lib_user_exists[1]
+            ui.txtUserNameBorrow.setText(name)
+            self.activate_borrow_button()
+        else:
+            self.can_borrow = False
+            ui.txtUserNameBorrow.clear()
+            self.show_book_borrow_error('Please ensure that all data provided is correct!!!')
+            ui.btnBorrowBook.setEnabled(False)
 
-	def error_message(self,message,box_title):
-		msg = QMessageBox(QMessageBox.Critical, box_title ,message)
-		msg.setStyleSheet('background-color:#800000;color:white;font-size:15px')
-		msg.exec_()
+    def validate_book(self):
+        ui = self.ui
+        book_id = ui.txtBookIdBorrow.text().upper()
+        book_available = search_book(book_id)
+        if book_available:
+            ui.txtBookNameBorrow.setText(book_available[1])
+            self.activate_borrow_button()
+        else:
+            self.can_borrow = False
+            ui.txtBookNameBorrow.clear()
+            self.show_book_borrow_error('Please ensure that all data provided is correct !!!')
+            ui.btnBorrowBook.setEnabled(False)
+
+    def activate_borrow_button(self):
+        if self.can_borrow:
+            self.ui.btnBorrowBook.setEnabled(True)
+            self.show_book_borrow_error('')
+        else:
+            self.show_book_borrow_error('Please ensure that all data provided is correct !!!')
+            self.can_borrow = True
+
+    def show_book_borrow_error(self, error):
+        if error:
+            self.ui.lblBookBorrowError.setStyleSheet('color:red;\nbackground-color:white;\nborder-radius:4px;')
+            self.ui.lblBookBorrowError.setText(error)
+        else:
+            self.ui.lblBookBorrowError.setStyleSheet('')
+            self.ui.lblBookBorrowError.setText('')
+
+    def autocomplete(self, lineedit, data):
+        completer = QCompleter(data)
+        completer.setCaseSensitivity(Qt.CaseInsensitive)
+        lineedit.setCompleter(completer)
+
+    def borrow_table_menu(self, position):
+
+        menu = QMenu()
+        menu.setTitle("hello world")
+        removeRow = menu.addAction("Set Returned")
+        removeIcon = qta.icon('fa5.check-circle')
+        removeRow.setIcon(removeIcon)
+        removeRow.setShortcut('ctrl+r')
+
+        action = menu.exec_(self.ui.tblBorrow.mapToGlobal(position))
+        if action == removeRow:
+            self.book_return()
+
+    def update_profile_menu(self):
+        menu = QMenu()
+        menu.addAction(qta.icon('fa5.edit'), 'Edit profile', self.update_user_profile, 'ctrl+e')
+        menu.addAction(qta.icon('fa5s.key'), 'Change password', self.change_user_password)
+        return menu
+
+    def update_user_profile(self):
+        dlg = UpdateProfile(self)
+        self.setWindowOpacity(0.5)
+        dlg.exec_()
+        self.setWindowOpacity(1)
+
+    def change_user_password(self):
+        dlg = ChangePassword(self)
+        dlg.exec_()
+
+    def book_table_menu(self, position):
+        menu = QMenu()
+        menu.setStyleSheet('font-weight:bold;font-size:13px;')
+        removeRow = menu.addAction("Remove Book")
+        removeRow.setIcon(qta.icon('fa5.check-circle'))
+        editRecord = menu.addAction('Edit details')
+        editRecord.setIcon(qta.icon('fa5.edit'))
+        menu.addSeparator()
+        book_id = self.tblBooks.item(self.tblBooks.currentRow(), 0).text()
+        if is_blacklisted(book_id):
+            menu.addAction(qta.icon('fa5s.lock-open', color='red'), "ublacklist", lambda: self.unblacklist(book_id),
+                           'ctrl+u')
+        else:
+            menu.addAction(qta.icon('fa5s.ban', color='red'), "blacklist", lambda: self.blacklist(book_id), 'ctrl+l')
+
+        action = menu.exec_(self.ui.tblBooks.mapToGlobal(position))
+
+        if action == editRecord:
+            self.edit_books()
+
+    def staff_table_menu(self, position):
+        print('hello')
+        menu = QMenu()
+        menu.addAction(self.icon('fa5s.user-plus', color='black'), 'Add as admin', self.add_admin)
+        menu.exec_(self.ui.tblStaff.mapToGlobal(position))
+
+    def add_admin(self):
+        lib_no = self.tblStaff.item(self.tblStaff.currentRow(), 0).text()
+        if create_admin(lib_no):
+            self.success_message(f"lib number {lib_no} activated successifully as admin", 'Admin added')
+        else:
+            self.error_message('an internal error ocurred', 'Fatal')
+
+    def report_table_menu(self, position):
+        menu = QMenu()
+        menu.addAction('View graph', self.create_book_usage_graph)
+        menu.exec_(self.ui.tblReport.mapToGlobal(position))
+
+    def blacklist(self, book_id):
+        dlg = BlacklistReason(self)
+        dlg.exec_()
+
+        if dlg.result():
+            reason = dlg.blacklistReason.toPlainText()
+            if blacklist(book_id, reason):
+                self.success_message(f'Book <b>{book_id}</b> has been blacklisted', 'Success')
+
+    def unblacklist(self, book_id):
+        if unblacklist(book_id):
+            self.success_message(f'Book have been <b>{book_id}</b> unblacklisted', 'Success')
+
+    def icon(self, icon_name, color='white', scale=1):
+        return qta.icon(icon_name, color=color, scale_factor=scale)
+
+    def activeButton(self, currentButton):
+        if currentButton.objectName() == 'btnLibSession':
+            self.pages.setCurrentWidget(self.pgLibSession)
+        elif currentButton.objectName() == 'btnBooks':
+            self.pages.setCurrentWidget(self.pgBooks)
+        elif currentButton.objectName() == 'btnStudents':
+            self.pages.setCurrentWidget(self.pgStudents)
+        elif currentButton.objectName() == 'btnStaff':
+            self.pages.setCurrentWidget(self.pgStaff)
+        elif currentButton.objectName() == 'btnSettings':
+            self.pages.setCurrentWidget(self.pgSettings)
+        elif currentButton.objectName() == 'btnReport':
+            self.pages.setCurrentWidget(self.pgReport)
+
+        self.previousButton.setStyleSheet('padding-left:10px;\npadding-right:5px;')
+
+        currentButton.setStyleSheet('padding-left:10px;border:none;padding-right:5px;')
+        self.previousButton = currentButton
+
+    def book_return(self):
+        lib_no = self.tblBorrow.item(self.tblBorrow.currentRow(), 0).text()
+        book_no = self.tblBorrow.item(self.tblBorrow.currentRow(), 2).text()
+        success = return_book(lib_no, book_no)
+        if success:
+            self.populate_borrow_book_table()
+
+    def edit_books(self):
+        row = self.tblBooks.currentRow()
+        book_id = self.tblBooks.item(row, 0).text()
+        book_name = self.tblBooks.item(row, 1).text()
+        book_category = self.tblBooks.item(row, 2).text()
+        date_added = self.tblBooks.item(row, 3).text()
+
+        self.bookIdDetails.setText(book_id)
+        self.bookNameDetails.setText(book_name)
+        self.dayBookAdded.setDate(dt.strptime(date_added, '%Y-%m-%d'))
+        self.cmbBookCategory.setCurrentText(book_category.capitalize())
+
+    def range_report(self):
+        from_date = self.fromDate.date().toPyDate()
+        to_date = self.toDate.date().toPyDate()
+
+        result = range_selection(from_date, to_date)
+        self.createtable(self.tblReport, ['Book Name', 'Category', 'Form or class', 'Times Borrowed'])
+        self.insert_into_table(self.tblReport, result)
+
+        self.txtTotalBooks.setText(get_total(result, 3))
+
+    def create_book_usage_graph(self):
+        from_date = self.fromDate.date().toPyDate()
+        to_date = self.toDate.date().toPyDate()
+        row = self.tblReport.currentRow()
+        book_name = self.tblReport.item(row, 0).text()
+        book_category = self.tblReport.item(row, 1).text()
+        form_class = self.tblReport.item(row, 2).text()
+
+        result = range_selection_by_date(book_name, book_category, form_class, from_date, to_date)
+        graph_axis = one_to_two_lists(result)
+        graph = self.create_graph()
+
+        self.vbox.addStretch()
+        self.vbox.insertWidget(self.vbox.count() - 1, graph)
+        graph.setMinimumHeight(300)
+        pen = pg.mkPen(color=(255, 0, 0))
+        graph.plot(pos=np.array(result))
+        graph.setBackground('w')
+        graph.setTitle(f'<u style = "color: blue; font-size:10em;">Graph for {book_name} class/ form {form_class}</u>')
+
+        graph.setLabel('left', "<span style=\"color:red\">Number of books borrowed (°C)</span>")
+        graph.setLabel('bottom', "<span style=\"color:red;\">Dates</span>")
+        graph.showGrid(x=True, y=True)
+
+    def create_graph(self):
+        graph_widget = pg.PlotWidget()
+        return graph_widget
+
+    def createtable(self, table, columns):
+        table.setColumnCount(len(columns))
+        table.setHorizontalHeaderLabels(columns)
+
+    def error_message(self, message, box_title):
+        msg = QMessageBox(QMessageBox.Critical, box_title, message)
+        msg.setStyleSheet('background-color:#800000;color:white;font-size:15px')
+
+        self.setWindowOpacity(0.5)
+        msg.exec_()
+        self.setWindowOpacity(1)
+
+    def set_min_and_max_date(self):
+        date_list = get_date_list(borrowing_history(), 3)
+        self.fromDate.setMinimumDate(min(date_list))
+        self.toDate.setMinimumDate(min(date_list))
+        self.fromDate.setMaximumDate(max(date_list))
+        self.toDate.setMaximumDate(max(date_list))
+        self.onDate.setMinimumDate(max(date_list))
+        self.onDate.setMaximumDate(max(date_list))
+
+    def login(self):
+        dlg = Login(self)
+        self.setWindowOpacity(0)
+        dlg.exec_()
+
+        if not dlg.result():
+            exit()
+
+        self.setWindowOpacity(1)
+
+    def success_message(self, message, box_title):
+        msg = QMessageBox(QMessageBox.Information, box_title, message)
+        msg.setStyleSheet('background-color:#800000;color:white;font-size:15px')
+        self.setWindowOpacity(0.5)
+        msg.exec_()
+        self.setWindowOpacity(1)
+
 
 app = QtWidgets.QApplication(sys.argv)
 window = Ui()

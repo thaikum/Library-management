@@ -1,22 +1,7 @@
-from PyQt5.QtWidgets import *
-import sys
+import bcrypt
 
-class Window(QWidget):
-    def __init__(self):
-        QWidget.__init__(self)
-        layout = QGridLayout()
-        self.setLayout(layout)
+password = "maina"
+hashed = bcrypt.hashpw(password)
+print(hashed)
 
-        # auto complete options                                                 
-        names = ["Apple", "Alps", "Berry", "Cherry" ]
-        completer = QCompleter(names)
-
-        # create line edit and add auto complete                                
-        self.lineedit = QLineEdit()
-        self.lineedit.setCompleter(completer)
-        layout.addWidget(self.lineedit, 0, 0)
-
-app = QApplication(sys.argv)
-screen = Window()
-screen.show()
-sys.exit(app.exec_())
+# 9b71d224bd62f3785d96d46ad3ea3d73319bfbc2890caadae2dff72519673ca72323c3d99ba5c11d7c7acc6e14b8c5da0c4663475c2e5c3adef46f73bcdec043

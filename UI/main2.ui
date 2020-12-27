@@ -2,11 +2,14 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="windowModality">
+   <enum>Qt::WindowModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>929</width>
+    <width>1077</width>
     <height>500</height>
    </rect>
   </property>
@@ -29,14 +32,17 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Kambirwa Primary School Community Library</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: #800000;
+   <string notr="true">background: #800000;
 color: rgb(255,255,255);
 font-size:12;
 
 </string>
+  </property>
+  <property name="tabShape">
+   <enum>QTabWidget::Rounded</enum>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="sizePolicy">
@@ -54,8 +60,379 @@ font-size:12;
    <property name="layoutDirection">
     <enum>Qt::LeftToRight</enum>
    </property>
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="0">
+   <property name="styleSheet">
+    <string notr="true">QLineEdit {
+    border-radius:5px;
+    margin:0px;
+    background-color:rgba(255,255,255,0.5);
+    margin-bottom:10px;
+    padding-left:3px;
+    color:black;
+}
+
+QPushButton:hover {
+    background-color:red;
+    color:black;
+    font-weight:bold;
+}
+
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+}
+
+QLabel[accessibleName = 'title']  {
+	text-decoration:underline;
+	font-size:20px;
+}
+
+QCheckBox::indicator:unchecked{
+	image: url(:images/square.png);
+}
+
+QCheckBox::indicator:checked {
+    image: url(:images/checkbox.png);
+}
+	</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_11">
+    <item>
+     <widget class="QWidget" name="horizontalWidget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>2000</width>
+        <height>41</height>
+       </size>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0,0,0,0">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QPushButton" name="btnLibSession">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>200</width>
+           <height>38</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">padding-left:10px;
+border:2px solid blue;
+padding-right:5px;</string>
+         </property>
+         <property name="text">
+          <string>Lib Session</string>
+         </property>
+         <property name="icon">
+          <iconset theme="icon.jpg">
+           <normaloff>../../../../../../../../../../../../../.designer/backup</normaloff>../../../../../../../../../../../../../.designer/backup</iconset>
+         </property>
+         <property name="autoDefault">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnBooks">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>200</width>
+           <height>38</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">padding-left:10px;
+padding-right:5px;</string>
+         </property>
+         <property name="text">
+          <string>Books</string>
+         </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnStudents">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Ignored">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>200</width>
+           <height>38</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">padding-left:10px;
+padding-right:5px;</string>
+         </property>
+         <property name="text">
+          <string>Students</string>
+         </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnStaff">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>200</width>
+           <height>38</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">padding-left:10px;
+padding-right:5px;</string>
+         </property>
+         <property name="text">
+          <string>Staff</string>
+         </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnReport">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>200</width>
+           <height>38</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">padding-left:10px;
+padding-right:5px;</string>
+         </property>
+         <property name="text">
+          <string>Report</string>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normalon>:/images/statistics.png</normalon>
+          </iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>24</width>
+           <height>24</height>
+          </size>
+         </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="maximumSize">
+          <size>
+           <width>407</width>
+           <height>41</height>
+          </size>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnUsers">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>40</width>
+           <height>38</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="toolTip">
+          <string comment="Hello world" extracomment="Settings"/>
+         </property>
+         <property name="toolTipDuration">
+          <number>30</number>
+         </property>
+         <property name="accessibleName">
+          <string>hello_world</string>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>24</width>
+           <height>24</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnSettings">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>40</width>
+           <height>38</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="toolTip">
+          <string comment="Hello world" extracomment="Settings"/>
+         </property>
+         <property name="toolTipDuration">
+          <number>30</number>
+         </property>
+         <property name="accessibleName">
+          <string>hello_world</string>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normalon>../../../../../../../../.designer/backup/settings2.svg</normalon>
+          </iconset>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
      <widget class="QStackedWidget" name="pages">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -95,7 +472,7 @@ font-size:12;
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="1,2">
         <item>
          <widget class="QFrame" name="frame">
           <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0,0,2">
@@ -337,7 +714,7 @@ color:black;
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_2">
              <item>
-              <widget class="QLineEdit" name="lineEdit">
+              <widget class="QLineEdit" name="txtBorrowSearch">
                <property name="font">
                 <font>
                  <pointsize>-1</pointsize>
@@ -350,13 +727,6 @@ background-color:rgba(255,255,255,0.5);
 padding-left:3px;
 color:black;
 </string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_2">
-               <property name="text">
-                <string>Search</string>
                </property>
               </widget>
              </item>
@@ -403,6 +773,9 @@ color:black;
              </property>
              <property name="selectionBehavior">
               <enum>QAbstractItemView::SelectRows</enum>
+             </property>
+             <property name="gridStyle">
+              <enum>Qt::NoPen</enum>
              </property>
              <property name="wordWrap">
               <bool>true</bool>
@@ -512,7 +885,7 @@ color:black;
        </layout>
       </widget>
       <widget class="QWidget" name="pgStaff">
-       <layout class="QHBoxLayout" name="horizontalLayout_27" stretch="0,0">
+       <layout class="QHBoxLayout" name="horizontalLayout_27" stretch="1,2">
         <item>
          <widget class="QFrame" name="frame">
           <layout class="QVBoxLayout" name="verticalLayout_7" stretch="0,1,0,2">
@@ -709,7 +1082,7 @@ font-weight:bold;
                <number>0</number>
               </property>
               <item>
-               <widget class="QLineEdit" name="stfSearch">
+               <widget class="QLineEdit" name="txtStaffSearch">
                 <property name="font">
                  <font>
                   <pointsize>-1</pointsize>
@@ -722,13 +1095,6 @@ background-color:rgba(255,255,255,0.5);
 padding-left:3px;
 color:black;
 </string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="pushButton_27">
-                <property name="text">
-                 <string>Search</string>
                 </property>
                </widget>
               </item>
@@ -747,6 +1113,9 @@ color:black;
            </item>
            <item>
             <widget class="QTableWidget" name="tblStaff">
+             <property name="contextMenuPolicy">
+              <enum>Qt::CustomContextMenu</enum>
+             </property>
              <property name="selectionBehavior">
               <enum>QAbstractItemView::SelectRows</enum>
              </property>
@@ -806,10 +1175,210 @@ color:black;
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="pgStudents">
-       <layout class="QHBoxLayout" name="horizontalLayout_12" stretch="0,0">
+      <widget class="QWidget" name="pgSettings"/>
+      <widget class="QWidget" name="page"/>
+      <widget class="QWidget" name="pgReport">
+       <layout class="QHBoxLayout" name="horizontalLayout_28">
         <item>
-         <widget class="QWidget" name="widget" native="true">
+         <widget class="QScrollArea" name="graphScroll">
+          <property name="verticalScrollBarPolicy">
+           <enum>Qt::ScrollBarAsNeeded</enum>
+          </property>
+          <property name="sizeAdjustPolicy">
+           <enum>QAbstractScrollArea::AdjustToContents</enum>
+          </property>
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <widget class="QWidget" name="scrollAreaWidgetContents">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>516</width>
+             <height>418</height>
+            </rect>
+           </property>
+          </widget>
+         </widget>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_13">
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_10">
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_9">
+              <item>
+               <widget class="QLabel" name="label_7">
+                <property name="accessibleName">
+                 <string>title</string>
+                </property>
+                <property name="text">
+                 <string>Range selection</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_16">
+                <item>
+                 <layout class="QFormLayout" name="formLayout_5">
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="label_3">
+                    <property name="text">
+                     <string>From:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QDateEdit" name="fromDate">
+                    <property name="calendarPopup">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QFormLayout" name="formLayout_6">
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="label_4">
+                    <property name="text">
+                     <string>To:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QDateEdit" name="toDate">
+                    <property name="calendarPopup">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="generateRangeReport">
+                  <property name="text">
+                   <string>Generate</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_22">
+                <property name="accessibleName">
+                 <string>title</string>
+                </property>
+                <property name="text">
+                 <string>Single day selection</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_24">
+                <item>
+                 <layout class="QFormLayout" name="formLayout_7">
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="label_5">
+                    <property name="text">
+                     <string>On:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QDateEdit" name="onDate">
+                    <property name="calendarPopup">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_2">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="generateOnReport">
+                  <property name="text">
+                   <string>Generate</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QTableWidget" name="tblReport">
+              <property name="contextMenuPolicy">
+               <enum>Qt::CustomContextMenu</enum>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+              <column>
+               <property name="text">
+                <string>New Column</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>New Column</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QFormLayout" name="formLayout_8">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>Total boooks borrowed:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="txtTotalBooks">
+              <property name="styleSheet">
+               <string notr="true">font-size:20px;</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="pgStudents">
+       <layout class="QHBoxLayout" name="horizontalLayout_12" stretch="1,2">
+        <item>
+         <widget class="QFrame" name="frame">
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -1001,8 +1570,8 @@ color:black;
           </layout>
          </widget>
         </item>
-        <item alignment="Qt::AlignLeft">
-         <widget class="QFrame" name="hhh">
+        <item>
+         <widget class="QWidget" name="hhh" native="true">
           <property name="minimumSize">
            <size>
             <width>529</width>
@@ -1049,7 +1618,7 @@ font-weight: bold;
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_10">
              <item>
-              <widget class="QLineEdit" name="lineEdit_2">
+              <widget class="QLineEdit" name="txtStudentSearch">
                <property name="styleSheet">
                 <string notr="true">border-radius:5px;
 margin:0px;
@@ -1058,13 +1627,6 @@ padding-left:3px;
 color:black;
 font-size:16px;
 </string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="btnStudentSearch">
-               <property name="text">
-                <string>Search</string>
                </property>
               </widget>
              </item>
@@ -1183,7 +1745,7 @@ font-size:16px;
        </layout>
       </widget>
       <widget class="QWidget" name="pgBooks">
-       <layout class="QHBoxLayout" name="horizontalLayout_19" stretch="0,0">
+       <layout class="QHBoxLayout" name="horizontalLayout_19" stretch="1,2">
         <item>
          <widget class="QFrame" name="frame">
           <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -1262,6 +1824,25 @@ color:black;
                 </property>
                </widget>
               </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_20">
+                <property name="text">
+                 <string>Date Added: </string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QDateEdit" name="dayBookAdded">
+                <property name="font">
+                 <font>
+                  <pointsize>-1</pointsize>
+                 </font>
+                </property>
+                <property name="calendarPopup">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
               <item row="3" column="0">
                <widget class="QLabel" name="label_12">
                 <property name="text">
@@ -1294,25 +1875,6 @@ color:black;
                   <string>Universal</string>
                  </property>
                 </item>
-               </widget>
-              </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="label_20">
-                <property name="text">
-                 <string>Date Added: </string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="1">
-               <widget class="QDateEdit" name="dayBookAdded">
-                <property name="font">
-                 <font>
-                  <pointsize>-1</pointsize>
-                 </font>
-                </property>
-                <property name="calendarPopup">
-                 <bool>true</bool>
-                </property>
                </widget>
               </item>
               <item row="4" column="0">
@@ -1367,8 +1929,8 @@ color:black;
              </property>
              <property name="sizeHint" stdset="0">
               <size>
-               <width>20</width>
-               <height>40</height>
+               <width>17</width>
+               <height>124</height>
               </size>
              </property>
             </spacer>
@@ -1412,7 +1974,7 @@ font-weight:bold;</string>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_17">
              <item>
-              <widget class="QLineEdit" name="lineEdit_5">
+              <widget class="QLineEdit" name="txtBookSearch">
                <property name="styleSheet">
                 <string notr="true">border-radius:5px;
 margin:0px;
@@ -1421,13 +1983,6 @@ padding-left:3px;
 color:black;
 font-size:16px;
 </string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="btnStudentSearch_2">
-               <property name="text">
-                <string>Search</string>
                </property>
               </widget>
              </item>
@@ -1538,252 +2093,6 @@ font-size:16px;
       </widget>
      </widget>
     </item>
-    <item row="0" column="0">
-     <widget class="QWidget" name="horizontalWidget" native="true">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>2000</width>
-        <height>41</height>
-       </size>
-      </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0,0">
-       <property name="spacing">
-        <number>0</number>
-       </property>
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
-       <item>
-        <widget class="QPushButton" name="btnLibSession">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>200</width>
-           <height>38</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>16</pointsize>
-          </font>
-         </property>
-         <property name="autoFillBackground">
-          <bool>false</bool>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">padding-left:10px;
-border:2px solid blue;
-padding-right:5px;</string>
-         </property>
-         <property name="text">
-          <string>Lib Session</string>
-         </property>
-         <property name="icon">
-          <iconset theme="icon.jpg">
-           <normaloff>../../../../../../../.designer/backup</normaloff>../../../../../../../.designer/backup</iconset>
-         </property>
-         <property name="autoDefault">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnBooks">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>200</width>
-           <height>38</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>16</pointsize>
-          </font>
-         </property>
-         <property name="autoFillBackground">
-          <bool>false</bool>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">padding-left:10px;
-padding-right:5px;</string>
-         </property>
-         <property name="text">
-          <string>Books</string>
-         </property>
-         <property name="autoDefault">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnStudents">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Ignored">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>200</width>
-           <height>38</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>16</pointsize>
-          </font>
-         </property>
-         <property name="autoFillBackground">
-          <bool>false</bool>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">padding-left:10px;
-padding-right:5px;</string>
-         </property>
-         <property name="text">
-          <string>Students</string>
-         </property>
-         <property name="autoDefault">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnStaff">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>200</width>
-           <height>38</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>16</pointsize>
-          </font>
-         </property>
-         <property name="autoFillBackground">
-          <bool>false</bool>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">padding-left:10px;
-padding-right:5px;</string>
-         </property>
-         <property name="text">
-          <string>Staff</string>
-         </property>
-         <property name="autoDefault">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="horizontalSpacer">
-         <property name="maximumSize">
-          <size>
-           <width>407</width>
-           <height>41</height>
-          </size>
-         </property>
-         <property name="autoFillBackground">
-          <bool>false</bool>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnSettings">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>40</width>
-           <height>38</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>16</pointsize>
-          </font>
-         </property>
-         <property name="toolTip">
-          <string comment="Hello world" extracomment="Settings"/>
-         </property>
-         <property name="toolTipDuration">
-          <number>8</number>
-         </property>
-         <property name="accessibleName">
-          <string>hello_world</string>
-         </property>
-         <property name="autoFillBackground">
-          <bool>false</bool>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">background-color:transparent;</string>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="icon">
-          <iconset>
-           <normalon>settings2.svg</normalon>
-          </iconset>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
    </layout>
   </widget>
  </widget>
@@ -1798,7 +2107,6 @@ padding-right:5px;</string>
   <tabstop>txtBookIdBorrow</tabstop>
   <tabstop>dtReturnDateBorrow</tabstop>
   <tabstop>btnBorrowBook</tabstop>
-  <tabstop>pushButton_2</tabstop>
   <tabstop>pushButton_3</tabstop>
   <tabstop>tblBorrow</tabstop>
   <tabstop>txtStdFname</tabstop>
@@ -1807,8 +2115,7 @@ padding-right:5px;</string>
   <tabstop>txtStdClass</tabstop>
   <tabstop>txtStdStream</tabstop>
   <tabstop>tblStudent</tabstop>
-  <tabstop>lineEdit_2</tabstop>
-  <tabstop>btnStudentSearch</tabstop>
+  <tabstop>txtStudentSearch</tabstop>
   <tabstop>btnStudentFilter</tabstop>
   <tabstop>pushButton_9</tabstop>
   <tabstop>pushButton_10</tabstop>
@@ -1825,8 +2132,7 @@ padding-right:5px;</string>
   <tabstop>pushButton_15</tabstop>
   <tabstop>clearBookDetails</tabstop>
   <tabstop>tblBooks</tabstop>
-  <tabstop>lineEdit_5</tabstop>
-  <tabstop>btnStudentSearch_2</tabstop>
+  <tabstop>txtBookSearch</tabstop>
   <tabstop>btnStudentFilter_2</tabstop>
   <tabstop>pushButton_17</tabstop>
   <tabstop>pushButton_18</tabstop>
@@ -1835,8 +2141,7 @@ padding-right:5px;</string>
   <tabstop>btnSettings</tabstop>
   <tabstop>pushButton_22</tabstop>
   <tabstop>tblStaff</tabstop>
-  <tabstop>stfSearch</tabstop>
-  <tabstop>pushButton_27</tabstop>
+  <tabstop>txtStaffSearch</tabstop>
   <tabstop>pushButton_28</tabstop>
   <tabstop>pushButton_29</tabstop>
   <tabstop>pushButton_30</tabstop>
@@ -1847,9 +2152,11 @@ padding-right:5px;</string>
   <tabstop>txtBookNameBorrow</tabstop>
   <tabstop>stfSaveDetails</tabstop>
   <tabstop>btnClearBookBorrow</tabstop>
-  <tabstop>lineEdit</tabstop>
+  <tabstop>txtBorrowSearch</tabstop>
   <tabstop>clearStaffDetails</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="Resources/resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

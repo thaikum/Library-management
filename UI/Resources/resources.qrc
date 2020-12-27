@@ -1,0 +1,19 @@
+<RCC>
+  <qresource prefix="images">
+    <file>enter.png</file>
+    <file>statistics.png</file>
+    <file>report.png</file>
+    <file>exchange.png</file>
+    <file>key.png</file>
+    <file>user.png</file>
+    <file>users.png</file>
+    <file>update-profile-user.png</file>
+    <file>profile.png</file>
+    <file>checkbox.png</file>
+    <file>square.png</file>
+    <file>unchecked2.svg</file>
+    <file>checked2.png</file>
+    <file>checked.jpeg</file>
+    <file>unchecked.png</file>
+  </qresource>
+</RCC>
