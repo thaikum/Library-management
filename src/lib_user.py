@@ -1,4 +1,4 @@
-from .dbConnect import cursor, connection
+from src.dbConnect import cursor, connection
 
 
 def add_lib_user(fname, sname, other_name, user_type, **kwargs):
@@ -45,7 +45,8 @@ def add_lib_user(fname, sname, other_name, user_type, **kwargs):
 
 def all_students():
     students = cursor.execute(
-        'select lib_no, first_name,second_name,other_name,class,stream from lib_user where user_type = "STUDENT"').fetchall()
+        'select lib_no, first_name,second_name,other_name,class,stream from lib_user where user_type = "STUDENT"').\
+        fetchall()
 
     new_student_list = []
     for student in students:
@@ -77,11 +78,25 @@ def prefixer(string):
         return string
 
 
-def create_admin(lib_no):
-    sql = """INSERT INTO authentication(lib_no) values(?)"""
-    result = cursor.execute(sql, [lib_no])
-    connection.commit()
-    return result
+def create_admin(lib_no, password=None):
+    if password:
+        sql = '''select lib_no from authentication where lib_no = ?'''
+        if cursor.execute(sql, [lib_no]).fetchone():
+            sql = '''select lib_no from authentication where lib_no =? and password is null'''
+            if cursor.execute(sql, [lib_no]).fetchone():
+                sql = '''update authentication set password = ? where lib_no = ?'''
+                cursor.execute(sql, [password, lib_no])
+                connection.commit()
+                return True,
+            else:
+                return False, f'User {lib_no} already exists'
+        else:
+            return False, 'Sorry you are not authorised to perform this action'
+    else:
+        sql = """INSERT INTO authentication(lib_no) values(?)"""
+        result = cursor.execute(sql, [lib_no])
+        connection.commit()
+        return result
 
 
 def login_admin(lib_no, password):

@@ -1,8 +1,9 @@
 import hashlib
+import string
 import sys
 import time
-import uuid
-import bcrypt
+import pyqtgraph as pg
+import numpy as np
 
 import qtawesome as qta
 from PyQt5 import QtWidgets, uic
@@ -14,7 +15,8 @@ from src.book_borrow import new_borrow, all_borrows, return_book, is_blacklisted
     range_selection_by_date, \
     borrowing_history
 from src.helper import *
-from src.lib_user import add_lib_user, create_admin, login_admin
+from src.lib_user import add_lib_user, create_admin, login_admin, create_admin
+from src import resources
 
 
 class ChangePassword(QDialog):
@@ -35,11 +37,47 @@ class BlacklistReason(QDialog):
         self.ui = uic.loadUi('../UI/BlacklistingDialog.ui', self)
 
 
+def success_message(message, box_title):
+    msg = QMessageBox(QMessageBox.Information, box_title, message)
+    msg.setStyleSheet('background-color:#800000;color:white;font-size:15px')
+    msg.exec_()
+
+
 class Login(QDialog):
     def __init__(self, *args, **kwargs):
         super(Login, self).__init__(*args, **kwargs)
         self.ui = uic.loadUi('../UI/login.ui', self)
+
+        # ======================== pages ====================================================
         self.btnLogin.clicked.connect(self.authenticate)
+        self.btnToSignup.clicked.connect(lambda: self.pages.setCurrentWidget(self.signupPage))
+        self.btnToLogin.clicked.connect(lambda: self.pages.setCurrentWidget(self.loginPage))
+        self.btnToLogin.click()
+
+        # ======================= password match checking ====================================
+        self.signupConfirmPassword.textChanged.connect(self.compare_password)
+
+        # ===================== sign up functionality ======================
+        self.signUp.clicked.connect(self.new_sign_up)
+
+    def compare_password(self):
+        password = self.signupNewPassword.text()
+        confirm_password = self.signupConfirmPassword.text()
+        if password != confirm_password:
+            self.show_sign_up_error("Password did not match")
+            self.signUp.setEnabled(False)
+
+        else:
+            self.show_sign_up_error("")
+            self.signUp.setEnabled(True)
+
+    def show_sign_up_error(self, error):
+        if error:
+            self.lblSignUpError.setText(error)
+            self.lblSignUpError.setStyleSheet("background-color:red;color:white;")
+        else:
+            self.lblSignUpError.setText('')
+            self.lblSignUpError.setStyleSheet('')
 
     def authenticate(self):
         lib_no = self.loginLibNo.text().upper()
@@ -48,8 +86,19 @@ class Login(QDialog):
         if success:
             self.accept()
         else:
-            self.errorLabel.setStyleSheet('background-color:white; color:red')
+            self.errorLabel.setStyleSheet('background-color:white; color:red; border-radius:15px;')
             self.errorLabel.setText("Invalid login credentials")
+
+    def new_sign_up(self):
+        lib_no = self.signupLibNo.text().upper()
+        password = hashlib.pbkdf2_hmac("sha256", self.signupNewPassword.text().encode(), lib_no.encode(), 100000).hex()
+        result = create_admin(lib_no, password=password)
+        if result[0]:
+            success_message('Account create successfully. You will be automatically loged in after this', 'Success')
+            self.loginLibNo.setText(lib_no)
+            self.accept()
+        else:
+            self.show_sign_up_error(result[1])
 
 
 class Ui(QtWidgets.QMainWindow):
@@ -57,6 +106,7 @@ class Ui(QtWidgets.QMainWindow):
     global_book_list = []
     global_book_borrow_list = []
     global_staff_list = []
+    logged_user: string = ''
 
     def __init__(self):
         super(Ui, self).__init__()
@@ -113,7 +163,7 @@ class Ui(QtWidgets.QMainWindow):
         self.btnStaff.setIcon(self.icon('fa5s.user-secret', scale=1.3))
         spin_icon = qta.icon('fa5s.cog', color='white', animation=qta.Spin(self.btnSettings))
         self.btnSettings.setIcon(spin_icon)
-        self.btnUsers.setIcon(self.icon('fa5s.user'))
+        self.btnUsers.setIcon(self.icon("fa5s.user"))
 
         # ====================== additional ui customisation ========================
         self.btnSettings.setText('')
@@ -142,13 +192,14 @@ class Ui(QtWidgets.QMainWindow):
             lambda: self.insert_into_table(self.tblStaff, search(self.global_staff_list, self.txtStaffSearch.text())))
         self.txtStudentSearch.textChanged.connect(lambda: self.insert_into_table(self.tblStudent,
                                                                                  search(self.global_student_list,
-                                                                                        self.txtStudentSearch.text())))
-
+                                                                                        self.txtStaffSearch.tet())))
         # =================================== Menu buttons ===============================
         self.btnUsers.setMenu(self.update_profile_menu())
 
         # ================================= report =============================================
         self.generateRangeReport.clicked.connect(self.range_report)
+        # ============================= Logout =====================================
+        self.btnLogout.clicked.connect(self.login)
         # =================================================================================
         self.showMaximized()
 
@@ -502,8 +553,11 @@ class Ui(QtWidgets.QMainWindow):
 
         if not dlg.result():
             exit()
-
-        self.setWindowOpacity(1)
+        else:
+            self.logged_user = dlg.loginLibNo.text()
+            self.lblLoginName.setText(
+                f"logged as: <span style = 'color: blue;font-size:16px;'>{self.logged_user.upper()}</span>")
+            self.setWindowOpacity(1)
 
     def success_message(self, message, box_title):
         msg = QMessageBox(QMessageBox.Information, box_title, message)
