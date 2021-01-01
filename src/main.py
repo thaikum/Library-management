@@ -15,20 +15,44 @@ from src.book_borrow import new_borrow, all_borrows, return_book, is_blacklisted
     range_selection_by_date, \
     borrowing_history
 from src.helper import *
-from src.lib_user import add_lib_user, create_admin, login_admin, create_admin
+from src.lib_user import *
 from src import resources
 
 
 class ChangePassword(QDialog):
     def __init__(self, *args, **kwargs):
+        self.lib_no = kwargs.get('lib_no')
+        del kwargs['lib_no']
         super(ChangePassword, self).__init__(*args, **kwargs)
         self.ui = uic.loadUi('../UI/passwordchange.ui', self)
+        self.changeConfirmPassword.textChanged.connect(lambda: password_matcher(self.changePasswordError,
+                                                                                self.changeNewPassword,
+                                                                                self.changeConfirmPassword))
+        self.btnChangePassword.clicked.connect(self.pchanger)
+
+    def pchanger(self):
+        if not self.changePasswordError.text():
+            password1 = self.changeOldPassword.text()
+            password2 = self.changeNewPassword.text()
+            password1 = password_hasher(self.lib_no, password1)
+            password2 = password_hasher(self.lib_no, password2)
+
+            pchange = change_password(self.lib_no, password1, password2)
+            if pchange:
+                success_message('Password changed successfully', 'Password changed')
+                self.accept()
+            else:
+                error_message('An internal error occurred \n please contact system admin', 'Internal error')
+        else:
+            error_message('fix the errors displayed above first!', 'Fix errors first')
 
 
 class UpdateProfile(QDialog):
     def __init__(self, *args, **kwargs):
         super(UpdateProfile, self).__init__(*args, **kwargs)
         self.ui = uic.loadUi('../UI/updateprofile.ui', self)
+
+
 
 
 class BlacklistReason(QDialog):
@@ -39,6 +63,12 @@ class BlacklistReason(QDialog):
 
 def success_message(message, box_title):
     msg = QMessageBox(QMessageBox.Information, box_title, message)
+    msg.setStyleSheet('background-color:#800000;color:white;font-size:15px')
+    msg.exec_()
+
+
+def error_message(message, box_title):
+    msg = QMessageBox(QMessageBox.Critical, box_title, message)
     msg.setStyleSheet('background-color:#800000;color:white;font-size:15px')
     msg.exec_()
 
@@ -55,29 +85,11 @@ class Login(QDialog):
         self.btnToLogin.click()
 
         # ======================= password match checking ====================================
-        self.signupConfirmPassword.textChanged.connect(self.compare_password)
+        self.signupConfirmPassword.textChanged.connect(
+            lambda: password_matcher(self.lblSignUpError, self.signupNewPassword, self.signupConfirmPassword))
 
         # ===================== sign up functionality ======================
         self.signUp.clicked.connect(self.new_sign_up)
-
-    def compare_password(self):
-        password = self.signupNewPassword.text()
-        confirm_password = self.signupConfirmPassword.text()
-        if password != confirm_password:
-            self.show_sign_up_error("Password did not match")
-            self.signUp.setEnabled(False)
-
-        else:
-            self.show_sign_up_error("")
-            self.signUp.setEnabled(True)
-
-    def show_sign_up_error(self, error):
-        if error:
-            self.lblSignUpError.setText(error)
-            self.lblSignUpError.setStyleSheet("background-color:red;color:white;")
-        else:
-            self.lblSignUpError.setText('')
-            self.lblSignUpError.setStyleSheet('')
 
     def authenticate(self):
         lib_no = self.loginLibNo.text().upper()
@@ -86,8 +98,7 @@ class Login(QDialog):
         if success:
             self.accept()
         else:
-            self.errorLabel.setStyleSheet('background-color:white; color:red; border-radius:15px;')
-            self.errorLabel.setText("Invalid login credentials")
+            display_label_error(self.errorLabel, 'Invalid login credentials')
 
     def new_sign_up(self):
         lib_no = self.signupLibNo.text().upper()
@@ -392,7 +403,7 @@ class Ui(QtWidgets.QMainWindow):
         self.setWindowOpacity(1)
 
     def change_user_password(self):
-        dlg = ChangePassword(self)
+        dlg = ChangePassword(self, lib_no=self.logged_user.upper())
         dlg.exec_()
 
     def book_table_menu(self, position):
@@ -416,7 +427,6 @@ class Ui(QtWidgets.QMainWindow):
             self.edit_books()
 
     def staff_table_menu(self, position):
-        print('hello')
         menu = QMenu()
         menu.addAction(self.icon('fa5s.user-plus', color='black'), 'Add as admin', self.add_admin)
         menu.exec_(self.ui.tblStaff.mapToGlobal(position))
