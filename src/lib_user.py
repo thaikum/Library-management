@@ -55,15 +55,29 @@ def all_students():
     return new_student_list
 
 
-def all_staff():
-    staff = cursor.execute(
-        'select lib_no, first_name, second_name, other_name, phone_number from lib_user where user_type = "STAFF" ').fetchall()
+def all_staff(user_type='normal'):
+    if user_type == 'super':
+        sql = '''select l.lib_no, l.first_name, l.second_name, l.other_name,l.phone_number, a.is_superadmin
+                from lib_user l
+                left join authentication a on l.lib_no = a.lib_no
+                where user_type = 'STAFF' '''
+    else:
+        sql = 'select lib_no, first_name, second_name, other_name, phone_number from lib_user where user_type = ' \
+              '"STAFF" '
+
+    staff = cursor.execute(sql)
 
     new_staff_list = []
     for each_staff in staff:
-        new_staff_list.append(
-            [each_staff[0], each_staff[1] + ' ' + each_staff[2].capitalize() + ' ' + each_staff[3].capitalize(),
-             each_staff[4]])
+        row = [each_staff[0], each_staff[1] + ' ' + each_staff[2].capitalize() + ' ' + each_staff[3].capitalize(),
+               each_staff[4]]
+        if len(each_staff) == 6:
+            if each_staff[5]:
+                row.append('Super Admin')
+            else:
+                row.append('Admin')
+
+        new_staff_list.append(row)
 
     return new_staff_list
 
@@ -120,10 +134,10 @@ def change_password(lib_no, old_password, new_password):
 
 
 def update_staff(lib_no, first_name, second_name, other_name, phone_no):
-    sql = '''update lib_user set first_name = ?, second_name = ?, other_name = ? where lib_no = ?'''
+    sql = '''update lib_user set first_name = ?, second_name = ?, other_name = ?, phone_number = ?where lib_no = ?'''
     result = cursor.execute(sql, [first_name, second_name, other_name, phone_no, lib_no])
     if result:
-        cursor.commit()
+        connection.commit()
         return True
     else:
         return False
@@ -136,3 +150,12 @@ def get_staff_details(lib_no):
         return result
     else:
         return False
+
+
+def get_admin_type(lib_no):
+    sql = '''select is_superadmin from authentication where lib_no = ?'''
+    result = cursor.execute(sql, [lib_no]).fetchone()
+    if result[0]:
+        return 'super'
+    else:
+        return 'normal'

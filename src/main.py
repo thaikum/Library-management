@@ -49,10 +49,33 @@ class ChangePassword(QDialog):
 
 class UpdateProfile(QDialog):
     def __init__(self, *args, **kwargs):
+        self.lib_no = kwargs.get('lib_no')
+        del kwargs['lib_no']
         super(UpdateProfile, self).__init__(*args, **kwargs)
         self.ui = uic.loadUi('../UI/updateprofile.ui', self)
+        self.btnUpdateProfile.clicked.connect(self.update)
+        self.pre_fill()
 
+    def pre_fill(self):
+        details = get_staff_details(self.lib_no)
+        self.updateFName.setText(details[0].capitalize())
+        self.updateSName.setText(details[1].capitalize())
+        self.updateOName.setText(details[2].capitalize())
+        self.updatePhone.setText(details[3])
+        self.lblUserName.setText(details[0].capitalize()+' '+details[1].capitalize()+' '+details[2].capitalize())
 
+    def update(self):
+        first_name = self.updateFName.text().upper()
+        second_name = self.updateSName.text().upper()
+        other_name = self.updateOName.text().upper()
+        phone = self.updatePhone.text()
+
+        updated = update_staff(self.lib_no, first_name, second_name, other_name, phone)
+        if updated:
+            success_message('Profile updated successfully', 'Profile updated')
+            self.accept()
+        else:
+            error_message('Internal error occurred', 'Internal, error')
 
 
 class BlacklistReason(QDialog):
@@ -118,6 +141,7 @@ class Ui(QtWidgets.QMainWindow):
     global_book_borrow_list = []
     global_staff_list = []
     logged_user: string = ''
+    logged_user_type: string = ''
 
     def __init__(self):
         super(Ui, self).__init__()
@@ -144,11 +168,6 @@ class Ui(QtWidgets.QMainWindow):
         self.ui.btnSaveBook.clicked.connect(self.add_new_book)
         self.ui.btnBorrowBook.clicked.connect(self.new_book_borrow)
 
-        # ====================populate tables =====================================================
-        self.populate_student_table()
-        self.populate_staff_table()
-        self.populate_book_table()
-        self.populate_borrow_book_table()
 
         # ================== Some constraints to enable/disable buttons ===========================
         self.txtLibNoBorrow.editingFinished.connect(self.validate_lib_user)
@@ -286,7 +305,7 @@ class Ui(QtWidgets.QMainWindow):
 
     def populate_staff_table(self):
         ui = self.ui
-        staff = all_staff()
+        staff = all_staff(user_type=self.logged_user_type)
         self.global_staff_list = staff
 
         self.insert_into_table(ui.tblStaff, staff)
@@ -397,10 +416,8 @@ class Ui(QtWidgets.QMainWindow):
         return menu
 
     def update_user_profile(self):
-        dlg = UpdateProfile(self)
-        self.setWindowOpacity(0.5)
+        dlg = UpdateProfile(self, lib_no=self.logged_user.upper())
         dlg.exec_()
-        self.setWindowOpacity(1)
 
     def change_user_password(self):
         dlg = ChangePassword(self, lib_no=self.logged_user.upper())
@@ -564,10 +581,17 @@ class Ui(QtWidgets.QMainWindow):
         if not dlg.result():
             exit()
         else:
-            self.logged_user = dlg.loginLibNo.text()
+            self.logged_user = dlg.loginLibNo.text().upper()
+            self.logged_user_type = get_admin_type(self.logged_user)
+
             self.lblLoginName.setText(
                 f"logged as: <span style = 'color: blue;font-size:16px;'>{self.logged_user.upper()}</span>")
-            self.setWindowOpacity(1)
+
+            # ====================populate tables =====================================================
+            self.populate_student_table()
+            # self.populate_staff_table()
+            self.populate_book_table()
+            self.populate_borrow_book_table()
 
     def success_message(self, message, box_title):
         msg = QMessageBox(QMessageBox.Information, box_title, message)
