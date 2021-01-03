@@ -5,20 +5,33 @@ def add_lib_user(fname, sname, other_name, user_type, **kwargs):
     if user_type == 'STUDENT':
         std_class = kwargs['std_class']
         stream = kwargs['stream']
-        sql = '''
-            insert into lib_user(lib_no,first_name,second_name,user_type, other_name,class,stream)
-            values(?,?,?,'STUDENT',?,?,?)
-        '''
+        updating_lib_no = kwargs.get('lib_no')
 
-        gen_sql = '''select lib_no from lib_user where user_type = 'STUDENT' order by lib_no desc limit 1'''
-        latest = cursor.execute(gen_sql).fetchone()
+        if updating_lib_no:
+            sql = '''update lib_user set first_name = ?, second_name = ?, other_name = ?, class = ?, stream = ?
+                    where lib_no = ?'''
+            result = cursor.execute(sql, [fname, sname, other_name, std_class, stream, updating_lib_no])
+            if result:
+                connection.commit()
+                return True
+            else:
+                return False
 
-        if latest:
-            lib_no = 'PP' + prefixer(str(int(latest[0].split(latest[0][1])[2]) + 1))
         else:
-            lib_no = 'PP001'
+            sql = '''
+                insert into lib_user(lib_no,first_name,second_name,user_type, other_name,class,stream)
+                values(?,?,?,'STUDENT',?,?,?)
+            '''
 
-        success_insert = cursor.execute(sql, [lib_no, fname, sname, other_name, std_class, stream])
+            gen_sql = '''select lib_no from lib_user where user_type = 'STUDENT' order by lib_no desc limit 1'''
+            latest = cursor.execute(gen_sql).fetchone()
+
+            if latest:
+                lib_no = 'PP' + prefixer(str(int(latest[0].split(latest[0][1])[2]) + 1))
+            else:
+                lib_no = 'PP001'
+
+            success_insert = cursor.execute(sql, [lib_no, fname, sname, other_name, std_class, stream])
 
     else:
         phone_no = kwargs['phone_no']
@@ -159,3 +172,45 @@ def get_admin_type(lib_no):
         return 'super'
     else:
         return 'normal'
+
+
+def blacklist_user(lib_no, reason):
+    sql = '''insert into blacklisted_user(lib_no, blacklisting_reason) values(?,?)'''
+    result = cursor.execute(sql, [lib_no, reason])
+    if result:
+        connection.commit()
+        return True
+    else:
+        return False
+
+
+def unblacklist_user(lib_no):
+    sql = '''delete from blacklisted_user where lib_no = ?'''
+    result = cursor.execute(sql, [lib_no])
+
+    if result:
+        connection.commit()
+        return True
+    else:
+        return False
+
+
+def check_for_user_blacklist(lib_no):
+    sql = '''select lib_no from blacklisted_user where lib_no = ?'''
+    result = cursor.execute(sql, [lib_no]).fetchone()
+
+    if result:
+        return True
+    else:
+        return False
+
+def create_admin(self, lib_no):
+    sql = '''insert into authentication(lib_no,is_superadmin) values(?)'''
+    result = cursor.execute(sql,[lib_no])
+    if result:
+        return True
+    else:
+        return False
+
+def promote_individal_student(lib_no):
+    sql = '''update lib_user set uset'''
