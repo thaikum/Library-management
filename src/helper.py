@@ -1,5 +1,6 @@
 import re
 from datetime import datetime as dt
+import hashlib
 
 from .book import all_books
 from .lib_user import all_staff, all_students
@@ -75,3 +76,26 @@ def one_to_two_lists(old_list):
         list_index_0.append(dt.strptime(item[0], '%Y-%m-%d'))
         list_index_1.append(dt.date((item[1])))
     return [list_index_0, list_index_1]
+
+
+def password_hasher(lib_no, password):
+    return hashlib.pbkdf2_hmac("sha256", password.encode(), lib_no.encode(), 100000).hex()
+
+
+def password_matcher(error_label, password1, password2):
+    password1 = password1.text()
+    password2 = password2.text()
+
+    if password1 == password2:
+        display_label_error(error_label, None)
+    else:
+        display_label_error(error_label, 'Password did not match')
+
+
+def display_label_error(label, error):
+    if error:
+        label.setStyleSheet('color:red; background:white')
+        label.setText(error)
+    else:
+        label.setStyleSheet('')
+        label.setText('')

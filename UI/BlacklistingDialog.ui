@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Reason for blacklisting\</string>
+   <string>Reason for blacklisting</string>
   </property>
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
@@ -46,7 +46,7 @@
 text-decoration:underline;</string>
       </property>
       <property name="text">
-       <string>Please enter reason for blacklisting the book</string>
+       <string>Please enter reason for blacklisting</string>
       </property>
      </widget>
     </item>

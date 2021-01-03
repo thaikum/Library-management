@@ -5,21 +5,33 @@ def add_lib_user(fname, sname, other_name, user_type, **kwargs):
     if user_type == 'STUDENT':
         std_class = kwargs['std_class']
         stream = kwargs['stream']
-        sql = '''
-            insert into lib_user(lib_no,first_name,second_name,user_type, other_name,class,stream)
-            values(?,?,?,'STUDENT',?,?,?)
-        '''
+        updating_lib_no = kwargs.get('lib_no')
 
-        gen_sql = '''select lib_no from lib_user where user_type = 'STUDENT' order by lib_no desc limit 1'''
-        latest = cursor.execute(gen_sql).fetchone()
+        if updating_lib_no:
+            sql = '''update lib_user set first_name = ?, second_name = ?, other_name = ?, class = ?, stream = ?
+                    where lib_no = ?'''
+            result = cursor.execute(sql, [fname, sname, other_name, std_class, stream, updating_lib_no])
+            if result:
+                connection.commit()
+                return True
+            else:
+                return False
 
-        if latest:
-            lib_no = 'PP' + prefixer(str(int(latest[0].split(latest[0][1])[2]) + 1))
         else:
-            lib_no = 'PP001'
+            sql = '''
+                insert into lib_user(lib_no,first_name,second_name,user_type, other_name,class,stream)
+                values(?,?,?,'STUDENT',?,?,?)
+            '''
 
-        success_insert = cursor.execute(sql, [lib_no, fname, sname, other_name, std_class, stream])
+            gen_sql = '''select lib_no from lib_user where user_type = 'STUDENT' order by lib_no desc limit 1'''
+            latest = cursor.execute(gen_sql).fetchone()
 
+            if latest:
+                lib_no = 'PP' + prefixer(str(int(latest[0].split(latest[0][1])[2]) + 1))
+            else:
+                lib_no = 'PP001'
+
+            success_insert = cursor.execute(sql, [lib_no, fname, sname, other_name, std_class, stream])
 
     else:
         phone_no = kwargs['phone_no']
@@ -45,7 +57,7 @@ def add_lib_user(fname, sname, other_name, user_type, **kwargs):
 
 def all_students():
     students = cursor.execute(
-        'select lib_no, first_name,second_name,other_name,class,stream from lib_user where user_type = "STUDENT"').\
+        'select lib_no, first_name,second_name,other_name,class,stream from lib_user where user_type = "STUDENT"'). \
         fetchall()
 
     new_student_list = []
@@ -56,15 +68,29 @@ def all_students():
     return new_student_list
 
 
-def all_staff():
-    staff = cursor.execute(
-        'select lib_no, first_name, second_name, other_name, phone_number from lib_user where user_type = "STAFF" ').fetchall()
+def all_staff(user_type='normal'):
+    if user_type == 'super':
+        sql = '''select l.lib_no, l.first_name, l.second_name, l.other_name,l.phone_number, a.is_superadmin
+                from lib_user l
+                left join authentication a on l.lib_no = a.lib_no
+                where user_type = 'STAFF' '''
+    else:
+        sql = 'select lib_no, first_name, second_name, other_name, phone_number from lib_user where user_type = ' \
+              '"STAFF" '
+
+    staff = cursor.execute(sql)
 
     new_staff_list = []
     for each_staff in staff:
-        new_staff_list.append(
-            [each_staff[0], each_staff[1] + ' ' + each_staff[2].capitalize() + ' ' + each_staff[3].capitalize(),
-             each_staff[4]])
+        row = [each_staff[0], each_staff[1] + ' ' + each_staff[2].capitalize() + ' ' + each_staff[3].capitalize(),
+               each_staff[4]]
+        if len(each_staff) == 6:
+            if each_staff[5]:
+                row.append('Super Admin')
+            else:
+                row.append('Admin')
+
+        new_staff_list.append(row)
 
     return new_staff_list
 
@@ -103,3 +129,88 @@ def login_admin(lib_no, password):
     sql = '''SELECT lib_no from authentication where lib_no = ? and password = ?'''
     result = cursor.execute(sql, [lib_no, password]).fetchone()
     return result
+
+
+def change_password(lib_no, old_password, new_password):
+    sql = '''select lib_no from authentication where lib_no = ? and password = ?'''
+    result = cursor.execute(sql, [lib_no, old_password]).fetchone()
+    if result:
+        sql = '''update authentication set password = ? where lib_no = ?'''
+        result = cursor.execute(sql, [new_password, lib_no])
+        connection.commit()
+        if result:
+            return True
+        else:
+            return False
+    else:
+        return False
+
+
+def update_staff(lib_no, first_name, second_name, other_name, phone_no):
+    sql = '''update lib_user set first_name = ?, second_name = ?, other_name = ?, phone_number = ?where lib_no = ?'''
+    result = cursor.execute(sql, [first_name, second_name, other_name, phone_no, lib_no])
+    if result:
+        connection.commit()
+        return True
+    else:
+        return False
+
+
+def get_staff_details(lib_no):
+    sql = '''select first_name, second_name, other_name, phone_number from lib_user where lib_no = ?'''
+    result = cursor.execute(sql, [lib_no]).fetchone()
+    if result:
+        return result
+    else:
+        return False
+
+
+def get_admin_type(lib_no):
+    sql = '''select is_superadmin from authentication where lib_no = ?'''
+    result = cursor.execute(sql, [lib_no]).fetchone()
+    if result[0]:
+        return 'super'
+    else:
+        return 'normal'
+
+
+def blacklist_user(lib_no, reason):
+    sql = '''insert into blacklisted_user(lib_no, blacklisting_reason) values(?,?)'''
+    result = cursor.execute(sql, [lib_no, reason])
+    if result:
+        connection.commit()
+        return True
+    else:
+        return False
+
+
+def unblacklist_user(lib_no):
+    sql = '''delete from blacklisted_user where lib_no = ?'''
+    result = cursor.execute(sql, [lib_no])
+
+    if result:
+        connection.commit()
+        return True
+    else:
+        return False
+
+
+def check_for_user_blacklist(lib_no):
+    sql = '''select lib_no from blacklisted_user where lib_no = ?'''
+    result = cursor.execute(sql, [lib_no]).fetchone()
+
+    if result:
+        return True
+    else:
+        return False
+
+def create_admin(self, lib_no):
+    sql = '''insert into authentication(lib_no,is_superadmin) values(?)'''
+    result = cursor.execute(sql,[lib_no])
+    if result:
+        return True
+    else:
+        return False
+
+def promote_individal_student(lib_no):
+    sql = '''update lib_user set uset'''

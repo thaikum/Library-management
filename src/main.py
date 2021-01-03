@@ -15,20 +15,67 @@ from src.book_borrow import new_borrow, all_borrows, return_book, is_blacklisted
     range_selection_by_date, \
     borrowing_history
 from src.helper import *
-from src.lib_user import add_lib_user, create_admin, login_admin, create_admin
+from src.lib_user import *
 from src import resources
 
 
 class ChangePassword(QDialog):
     def __init__(self, *args, **kwargs):
+        self.lib_no = kwargs.get('lib_no')
+        del kwargs['lib_no']
         super(ChangePassword, self).__init__(*args, **kwargs)
         self.ui = uic.loadUi('../UI/passwordchange.ui', self)
+        self.changeConfirmPassword.textChanged.connect(lambda: password_matcher(self.changePasswordError,
+                                                                                self.changeNewPassword,
+                                                                                self.changeConfirmPassword))
+        self.btnChangePassword.clicked.connect(self.pchanger)
+
+    def pchanger(self):
+        if not self.changePasswordError.text():
+            password1 = self.changeOldPassword.text()
+            password2 = self.changeNewPassword.text()
+            password1 = password_hasher(self.lib_no, password1)
+            password2 = password_hasher(self.lib_no, password2)
+
+            pchange = change_password(self.lib_no, password1, password2)
+            if pchange:
+                success_message('Password changed successfully', 'Password changed')
+                self.accept()
+            else:
+                error_message('An internal error occurred \n please contact system admin', 'Internal error')
+        else:
+            error_message('fix the errors displayed above first!', 'Fix errors first')
 
 
 class UpdateProfile(QDialog):
     def __init__(self, *args, **kwargs):
+        self.lib_no = kwargs.get('lib_no')
+        del kwargs['lib_no']
         super(UpdateProfile, self).__init__(*args, **kwargs)
         self.ui = uic.loadUi('../UI/updateprofile.ui', self)
+        self.btnUpdateProfile.clicked.connect(self.update)
+        self.pre_fill()
+
+    def pre_fill(self):
+        details = get_staff_details(self.lib_no)
+        self.updateFName.setText(details[0].capitalize())
+        self.updateSName.setText(details[1].capitalize())
+        self.updateOName.setText(details[2].capitalize())
+        self.updatePhone.setText(details[3])
+        self.lblUserName.setText(details[0].capitalize()+' '+details[1].capitalize()+' '+details[2].capitalize())
+
+    def update(self):
+        first_name = self.updateFName.text().upper()
+        second_name = self.updateSName.text().upper()
+        other_name = self.updateOName.text().upper()
+        phone = self.updatePhone.text()
+
+        updated = update_staff(self.lib_no, first_name, second_name, other_name, phone)
+        if updated:
+            success_message('Profile updated successfully', 'Profile updated')
+            self.accept()
+        else:
+            error_message('Internal error occurred', 'Internal, error')
 
 
 class BlacklistReason(QDialog):
@@ -39,6 +86,12 @@ class BlacklistReason(QDialog):
 
 def success_message(message, box_title):
     msg = QMessageBox(QMessageBox.Information, box_title, message)
+    msg.setStyleSheet('background-color:#800000;color:white;font-size:15px')
+    msg.exec_()
+
+
+def error_message(message, box_title):
+    msg = QMessageBox(QMessageBox.Critical, box_title, message)
     msg.setStyleSheet('background-color:#800000;color:white;font-size:15px')
     msg.exec_()
 
@@ -55,29 +108,11 @@ class Login(QDialog):
         self.btnToLogin.click()
 
         # ======================= password match checking ====================================
-        self.signupConfirmPassword.textChanged.connect(self.compare_password)
+        self.signupConfirmPassword.textChanged.connect(
+            lambda: password_matcher(self.lblSignUpError, self.signupNewPassword, self.signupConfirmPassword))
 
         # ===================== sign up functionality ======================
         self.signUp.clicked.connect(self.new_sign_up)
-
-    def compare_password(self):
-        password = self.signupNewPassword.text()
-        confirm_password = self.signupConfirmPassword.text()
-        if password != confirm_password:
-            self.show_sign_up_error("Password did not match")
-            self.signUp.setEnabled(False)
-
-        else:
-            self.show_sign_up_error("")
-            self.signUp.setEnabled(True)
-
-    def show_sign_up_error(self, error):
-        if error:
-            self.lblSignUpError.setText(error)
-            self.lblSignUpError.setStyleSheet("background-color:red;color:white;")
-        else:
-            self.lblSignUpError.setText('')
-            self.lblSignUpError.setStyleSheet('')
 
     def authenticate(self):
         lib_no = self.loginLibNo.text().upper()
@@ -86,8 +121,7 @@ class Login(QDialog):
         if success:
             self.accept()
         else:
-            self.errorLabel.setStyleSheet('background-color:white; color:red; border-radius:15px;')
-            self.errorLabel.setText("Invalid login credentials")
+            display_label_error(self.errorLabel, 'Invalid login credentials')
 
     def new_sign_up(self):
         lib_no = self.signupLibNo.text().upper()
@@ -107,6 +141,7 @@ class Ui(QtWidgets.QMainWindow):
     global_book_borrow_list = []
     global_staff_list = []
     logged_user: string = ''
+    logged_user_type: string = ''
 
     def __init__(self):
         super(Ui, self).__init__()
@@ -133,11 +168,6 @@ class Ui(QtWidgets.QMainWindow):
         self.ui.btnSaveBook.clicked.connect(self.add_new_book)
         self.ui.btnBorrowBook.clicked.connect(self.new_book_borrow)
 
-        # ====================populate tables =====================================================
-        self.populate_student_table()
-        self.populate_staff_table()
-        self.populate_book_table()
-        self.populate_borrow_book_table()
 
         # ================== Some constraints to enable/disable buttons ===========================
         self.txtLibNoBorrow.editingFinished.connect(self.validate_lib_user)
@@ -155,6 +185,7 @@ class Ui(QtWidgets.QMainWindow):
         self.ui.tblBooks.customContextMenuRequested.connect(self.book_table_menu)
         self.ui.tblReport.customContextMenuRequested.connect(self.report_table_menu)
         self.ui.tblStaff.customContextMenuRequested.connect(self.staff_table_menu)
+        self.ui.tblStudent.customContextMenuRequested.connect(self.student_table_menu)
 
         # ======================= setting icons ======================================
         self.btnBooks.setIcon(self.icon('fa5s.book', scale=1.3))
@@ -177,6 +208,7 @@ class Ui(QtWidgets.QMainWindow):
         self.vbox = QVBoxLayout()
         self.mywidget.setLayout(self.vbox)
         self.mywidget.setMaximumHeight(16777215)
+
         # ====================== search functionallity ==============================
         self.txtBookSearch.setPlaceholderText('Search...')
         self.txtBorrowSearch.setPlaceholderText('Search...')
@@ -200,12 +232,22 @@ class Ui(QtWidgets.QMainWindow):
         self.generateRangeReport.clicked.connect(self.range_report)
         # ============================= Logout =====================================
         self.btnLogout.clicked.connect(self.login)
+
+        # =========================================================================
+        self.clearStudentDetails.clicked.connect(lambda: self.btnSaveStd.setText('Save'))
+
+        # ============================== populate tables===============================
+        self.populate_book_table()
+        self.populate_staff_table()
+        self.populate_student_table()
+        self.populate_borrow_book_table()
+
         # =================================================================================
         self.showMaximized()
 
     def new_student(self):
         ui = self.ui
-
+        lib_no = ui.txtNewLibNo.text().upper()
         fname = ui.txtStdFname.text().upper()
         sname = ui.txtStdSname.text().upper()
         oname = ui.txtStdOname.text().upper()
@@ -213,7 +255,12 @@ class Ui(QtWidgets.QMainWindow):
         std_class = ui.txtStdClass.text()
         stream = ui.txtStdStream.text().upper()
 
-        details = add_lib_user(fname, sname, oname, user_type, std_class=std_class, stream=stream)
+        if not lib_no:
+            details = add_lib_user(fname, sname, oname, user_type, std_class=std_class, stream=stream)
+
+
+        else:
+            details = add_lib_user(fname,sname,oname, user_type, std_class=std_class,stream=stream,lib_no = lib_no)
 
         if details:
             ui.clearStudentDetails.click()
@@ -275,7 +322,7 @@ class Ui(QtWidgets.QMainWindow):
 
     def populate_staff_table(self):
         ui = self.ui
-        staff = all_staff()
+        staff = all_staff(user_type=self.logged_user_type)
         self.global_staff_list = staff
 
         self.insert_into_table(ui.tblStaff, staff)
@@ -369,7 +416,6 @@ class Ui(QtWidgets.QMainWindow):
     def borrow_table_menu(self, position):
 
         menu = QMenu()
-        menu.setTitle("hello world")
         removeRow = menu.addAction("Set Returned")
         removeIcon = qta.icon('fa5.check-circle')
         removeRow.setIcon(removeIcon)
@@ -379,20 +425,68 @@ class Ui(QtWidgets.QMainWindow):
         if action == removeRow:
             self.book_return()
 
+    def student_table_menu(self, position):
+        menu = QMenu()
+        menu.addAction(qta.icon('fa5.edit'), 'Edit details', self.edit_student_details)
+        lib_no = self.tblStudent.item(self.tblStudent.currentRow(), 0).text().upper()
+        if check_for_user_blacklist(lib_no):
+            menu.addAction(qta.icon('fa5s.lock-open', color='red'), "ublacklist", lambda: self.unblacklist_user(lib_no))
+        else:
+            menu.addAction(qta.icon('fa5s.ban', color='red'), 'Blacklist', lambda: self.blacklist_user(lib_no))
+
+        menu.exec_(self.ui.tblStudent.mapToGlobal(position))
+
     def update_profile_menu(self):
         menu = QMenu()
         menu.addAction(qta.icon('fa5.edit'), 'Edit profile', self.update_user_profile, 'ctrl+e')
         menu.addAction(qta.icon('fa5s.key'), 'Change password', self.change_user_password)
         return menu
 
-    def update_user_profile(self):
-        dlg = UpdateProfile(self)
-        self.setWindowOpacity(0.5)
+# ===================================== student menu action ===================================
+    def edit_student_details(self):
+        row = self.tblStudent.currentRow()
+        lib_no = self.tblStudent.item(row, 0).text()
+        name = self.tblStudent.item(row, 1).text().split(' ')
+        student_class = self.tblStudent.item(row, 2).text().split(' ')
+
+        if len(name) == 3:
+            fname = name[0]
+            sname = name[1]
+            oname = name[2]
+
+        else:
+            fname = name[0]
+            sname = name[1]
+            oname = ''
+
+        self.txtNewLibNo.setText(lib_no)
+        self.txtStdFname.setText(fname)
+        self.txtStdSname.setText(sname)
+        self.txtStdOname.setText(oname)
+        self.txtStdClass.setText(student_class[0])
+        self.txtStdStream.setText(student_class[1])
+
+        self.btnSaveStd.setText('Update')
+
+    def blacklist_user(self, lib_no):
+        dlg = BlacklistReason(self)
         dlg.exec_()
-        self.setWindowOpacity(1)
+
+        if dlg.result():
+            reason = dlg.blacklistReason.toPlainText()
+            if blacklist_user(lib_no, reason):
+                self.success_message(f'User <b>{lib_no}</b> has been blacklisted', 'Success')
+
+    def unblacklist_user(self, lib_no):
+        if unblacklist_user(lib_no):
+            success_message(f'Use <b>{lib_no}</b> has been removed from blacklisting list','Unblacklisted')
+
+    def update_user_profile(self):
+        dlg = UpdateProfile(self, lib_no=self.logged_user.upper())
+        dlg.exec_()
 
     def change_user_password(self):
-        dlg = ChangePassword(self)
+        dlg = ChangePassword(self, lib_no=self.logged_user.upper())
         dlg.exec_()
 
     def book_table_menu(self, position):
@@ -416,7 +510,6 @@ class Ui(QtWidgets.QMainWindow):
             self.edit_books()
 
     def staff_table_menu(self, position):
-        print('hello')
         menu = QMenu()
         menu.addAction(self.icon('fa5s.user-plus', color='black'), 'Add as admin', self.add_admin)
         menu.exec_(self.ui.tblStaff.mapToGlobal(position))
@@ -553,11 +646,15 @@ class Ui(QtWidgets.QMainWindow):
 
         if not dlg.result():
             exit()
+
         else:
-            self.logged_user = dlg.loginLibNo.text()
+            self.logged_user = dlg.loginLibNo.text().upper()
+            self.logged_user_type = get_admin_type(self.logged_user)
+
             self.lblLoginName.setText(
                 f"logged as: <span style = 'color: blue;font-size:16px;'>{self.logged_user.upper()}</span>")
-            self.setWindowOpacity(1)
+
+        self.setWindowOpacity(1)
 
     def success_message(self, message, box_title):
         msg = QMessageBox(QMessageBox.Information, box_title, message)
