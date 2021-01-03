@@ -185,6 +185,7 @@ class Ui(QtWidgets.QMainWindow):
         self.ui.tblBooks.customContextMenuRequested.connect(self.book_table_menu)
         self.ui.tblReport.customContextMenuRequested.connect(self.report_table_menu)
         self.ui.tblStaff.customContextMenuRequested.connect(self.staff_table_menu)
+        self.ui.tblStudent.customContextMenuRequested.connect(self.student_table_menu)
 
         # ======================= setting icons ======================================
         self.btnBooks.setIcon(self.icon('fa5s.book', scale=1.3))
@@ -207,6 +208,7 @@ class Ui(QtWidgets.QMainWindow):
         self.vbox = QVBoxLayout()
         self.mywidget.setLayout(self.vbox)
         self.mywidget.setMaximumHeight(16777215)
+
         # ====================== search functionallity ==============================
         self.txtBookSearch.setPlaceholderText('Search...')
         self.txtBorrowSearch.setPlaceholderText('Search...')
@@ -230,12 +232,22 @@ class Ui(QtWidgets.QMainWindow):
         self.generateRangeReport.clicked.connect(self.range_report)
         # ============================= Logout =====================================
         self.btnLogout.clicked.connect(self.login)
+
+        # =========================================================================
+        self.clearStudentDetails.clicked.connect(lambda: self.btnSaveStd.setText('Save'))
+
+        # ============================== populate tables===============================
+        self.populate_book_table()
+        self.populate_staff_table()
+        self.populate_student_table()
+        self.populate_borrow_book_table()
+
         # =================================================================================
         self.showMaximized()
 
     def new_student(self):
         ui = self.ui
-
+        lib_no = ui.txtNewLibNo.text().upper()
         fname = ui.txtStdFname.text().upper()
         sname = ui.txtStdSname.text().upper()
         oname = ui.txtStdOname.text().upper()
@@ -243,7 +255,12 @@ class Ui(QtWidgets.QMainWindow):
         std_class = ui.txtStdClass.text()
         stream = ui.txtStdStream.text().upper()
 
-        details = add_lib_user(fname, sname, oname, user_type, std_class=std_class, stream=stream)
+        if not lib_no:
+            details = add_lib_user(fname, sname, oname, user_type, std_class=std_class, stream=stream)
+
+
+        else:
+            details = add_lib_user(fname,sname,oname, user_type, std_class=std_class,stream=stream,lib_no = lib_no)
 
         if details:
             ui.clearStudentDetails.click()
@@ -399,7 +416,6 @@ class Ui(QtWidgets.QMainWindow):
     def borrow_table_menu(self, position):
 
         menu = QMenu()
-        menu.setTitle("hello world")
         removeRow = menu.addAction("Set Returned")
         removeIcon = qta.icon('fa5.check-circle')
         removeRow.setIcon(removeIcon)
@@ -409,11 +425,61 @@ class Ui(QtWidgets.QMainWindow):
         if action == removeRow:
             self.book_return()
 
+    def student_table_menu(self, position):
+        menu = QMenu()
+        menu.addAction(qta.icon('fa5.edit'), 'Edit details', self.edit_student_details)
+        lib_no = self.tblStudent.item(self.tblStudent.currentRow(), 0).text().upper()
+        if check_for_user_blacklist(lib_no):
+            menu.addAction(qta.icon('fa5s.lock-open', color='red'), "ublacklist", lambda: self.unblacklist_user(lib_no))
+        else:
+            menu.addAction(qta.icon('fa5s.ban', color='red'), 'Blacklist', lambda: self.blacklist_user(lib_no))
+
+        menu.exec_(self.ui.tblStudent.mapToGlobal(position))
+
     def update_profile_menu(self):
         menu = QMenu()
         menu.addAction(qta.icon('fa5.edit'), 'Edit profile', self.update_user_profile, 'ctrl+e')
         menu.addAction(qta.icon('fa5s.key'), 'Change password', self.change_user_password)
         return menu
+
+# ===================================== student menu action ===================================
+    def edit_student_details(self):
+        row = self.tblStudent.currentRow()
+        lib_no = self.tblStudent.item(row, 0).text()
+        name = self.tblStudent.item(row, 1).text().split(' ')
+        student_class = self.tblStudent.item(row, 2).text().split(' ')
+
+        if len(name) == 3:
+            fname = name[0]
+            sname = name[1]
+            oname = name[2]
+
+        else:
+            fname = name[0]
+            sname = name[1]
+            oname = ''
+
+        self.txtNewLibNo.setText(lib_no)
+        self.txtStdFname.setText(fname)
+        self.txtStdSname.setText(sname)
+        self.txtStdOname.setText(oname)
+        self.txtStdClass.setText(student_class[0])
+        self.txtStdStream.setText(student_class[1])
+
+        self.btnSaveStd.setText('Update')
+
+    def blacklist_user(self, lib_no):
+        dlg = BlacklistReason(self)
+        dlg.exec_()
+
+        if dlg.result():
+            reason = dlg.blacklistReason.toPlainText()
+            if blacklist_user(lib_no, reason):
+                self.success_message(f'User <b>{lib_no}</b> has been blacklisted', 'Success')
+
+    def unblacklist_user(self, lib_no):
+        if unblacklist_user(lib_no):
+            success_message(f'Use <b>{lib_no}</b> has been removed from blacklisting list','Unblacklisted')
 
     def update_user_profile(self):
         dlg = UpdateProfile(self, lib_no=self.logged_user.upper())
@@ -580,6 +646,7 @@ class Ui(QtWidgets.QMainWindow):
 
         if not dlg.result():
             exit()
+
         else:
             self.logged_user = dlg.loginLibNo.text().upper()
             self.logged_user_type = get_admin_type(self.logged_user)
@@ -587,11 +654,7 @@ class Ui(QtWidgets.QMainWindow):
             self.lblLoginName.setText(
                 f"logged as: <span style = 'color: blue;font-size:16px;'>{self.logged_user.upper()}</span>")
 
-            # ====================populate tables =====================================================
-            self.populate_student_table()
-            # self.populate_staff_table()
-            self.populate_book_table()
-            self.populate_borrow_book_table()
+        self.setWindowOpacity(1)
 
     def success_message(self, message, box_title):
         msg = QMessageBox(QMessageBox.Information, box_title, message)

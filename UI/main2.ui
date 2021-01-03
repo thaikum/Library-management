@@ -516,7 +516,7 @@ font-size:13px;</string>
 </string>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>5</number>
       </property>
       <widget class="QWidget" name="pgLibSession">
        <property name="sizePolicy">
@@ -1253,8 +1253,8 @@ color:black;
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>16</width>
-             <height>16</height>
+             <width>520</width>
+             <height>428</height>
             </rect>
            </property>
           </widget>
@@ -1474,14 +1474,14 @@ font-weight: bold;
               <string notr="true">font-size:16px;</string>
              </property>
              <layout class="QFormLayout" name="formLayout_3">
-              <item row="0" column="0">
+              <item row="1" column="0">
                <widget class="QLabel" name="firstNameLabel_2">
                 <property name="text">
                  <string>First  Name</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="1">
+              <item row="1" column="1">
                <widget class="QLineEdit" name="txtStdFname">
                 <property name="styleSheet">
                  <string notr="true">border-radius:5px;
@@ -1494,14 +1494,14 @@ color:black;
                 </property>
                </widget>
               </item>
-              <item row="1" column="0">
+              <item row="2" column="0">
                <widget class="QLabel" name="label_14">
                 <property name="text">
                  <string>Second Name:</string>
                 </property>
                </widget>
               </item>
-              <item row="1" column="1">
+              <item row="2" column="1">
                <widget class="QLineEdit" name="txtStdSname">
                 <property name="styleSheet">
                  <string notr="true">border-radius:5px;
@@ -1514,14 +1514,14 @@ color:black;
                 </property>
                </widget>
               </item>
-              <item row="2" column="0">
+              <item row="3" column="0">
                <widget class="QLabel" name="label_15">
                 <property name="text">
                  <string>Third Name</string>
                 </property>
                </widget>
               </item>
-              <item row="2" column="1">
+              <item row="3" column="1">
                <widget class="QLineEdit" name="txtStdOname">
                 <property name="styleSheet">
                  <string notr="true">border-radius:5px;
@@ -1534,14 +1534,14 @@ color:black;
                 </property>
                </widget>
               </item>
-              <item row="3" column="0">
+              <item row="4" column="0">
                <widget class="QLabel" name="label_16">
                 <property name="text">
                  <string>Class:</string>
                 </property>
                </widget>
               </item>
-              <item row="3" column="1">
+              <item row="4" column="1">
                <widget class="QLineEdit" name="txtStdClass">
                 <property name="styleSheet">
                  <string notr="true">border-radius:5px;
@@ -1557,14 +1557,14 @@ color:black;
                 </property>
                </widget>
               </item>
-              <item row="4" column="0">
+              <item row="5" column="0">
                <widget class="QLabel" name="label_17">
                 <property name="text">
                  <string>Stream</string>
                 </property>
                </widget>
               </item>
-              <item row="4" column="1">
+              <item row="5" column="1">
                <widget class="QLineEdit" name="txtStdStream">
                 <property name="styleSheet">
                  <string notr="true">border-radius:5px;
@@ -1574,6 +1574,23 @@ margin-bottom:10px;
 padding-left:3px;
 color:black;
 </string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_33">
+                <property name="text">
+                 <string>Lib No:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="txtNewLibNo">
+                <property name="echoMode">
+                 <enum>QLineEdit::Normal</enum>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1699,6 +1716,9 @@ font-size:16px;
            </item>
            <item>
             <widget class="QTableWidget" name="tblStudent">
+             <property name="contextMenuPolicy">
+              <enum>Qt::CustomContextMenu</enum>
+             </property>
              <property name="autoFillBackground">
               <bool>true</bool>
              </property>
@@ -1785,13 +1805,6 @@ font-size:16px;
               <widget class="QPushButton" name="pushButton_11">
                <property name="text">
                 <string>Promote All</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_13">
-               <property name="text">
-                <string>Blacklist</string>
                </property>
               </widget>
              </item>
@@ -2179,7 +2192,6 @@ font-size:16px;
   <tabstop>pushButton_10</tabstop>
   <tabstop>pushButton_11</tabstop>
   <tabstop>pushButton_12</tabstop>
-  <tabstop>pushButton_13</tabstop>
   <tabstop>pushButton_6</tabstop>
   <tabstop>pushButton_8</tabstop>
   <tabstop>clearStudentDetails</tabstop>
@@ -2216,5 +2228,102 @@ font-size:16px;
  <resources>
   <include location="Resources/resources.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>clearStudentDetails</sender>
+   <signal>clicked()</signal>
+   <receiver>txtNewLibNo</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>234</x>
+     <y>336</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>220</x>
+     <y>112</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearStudentDetails</sender>
+   <signal>clicked()</signal>
+   <receiver>txtStdFname</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>243</x>
+     <y>336</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>228</x>
+     <y>146</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearStudentDetails</sender>
+   <signal>clicked()</signal>
+   <receiver>txtStdSname</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>252</x>
+     <y>335</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>247</x>
+     <y>180</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearStudentDetails</sender>
+   <signal>clicked()</signal>
+   <receiver>txtStdOname</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>269</x>
+     <y>334</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>271</x>
+     <y>220</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearStudentDetails</sender>
+   <signal>clicked()</signal>
+   <receiver>txtStdClass</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>207</x>
+     <y>335</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>203</x>
+     <y>258</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearStudentDetails</sender>
+   <signal>clicked()</signal>
+   <receiver>txtStdStream</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>259</x>
+     <y>342</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>261</x>
+     <y>287</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
