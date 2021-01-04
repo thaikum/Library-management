@@ -285,7 +285,7 @@ class Ui(QtWidgets.QMainWindow):
         phone_no = ui.stfPhoneNo.text()
 
         if lib_no:
-            details = add_lib_user(fname, sname, oname, user_type, phone_no=phone_no,lib_no = lib_no)
+            details = add_lib_user(fname, sname, oname, user_type, phone_no=phone_no, lib_no=lib_no)
             if details:
                 success_message('staff details updated successfully', 'Details updated')
                 self.populate_staff_table()
@@ -293,7 +293,7 @@ class Ui(QtWidgets.QMainWindow):
                 self.populate_borrow_book_table()
 
             else:
-                error_message('An internal error occurred \nPlease contact admin for more details','Could not update')
+                error_message('An internal error occurred \nPlease contact admin for more details', 'Could not update')
 
         else:
             details = add_lib_user(fname, sname, oname, user_type, phone_no=phone_no)
@@ -314,7 +314,7 @@ class Ui(QtWidgets.QMainWindow):
             self.clearBookDetails.click()
             self.populate_book_table()
         else:
-            self.error_message('A book with such details exists', 'Book exists!')
+            error_message('A book with such details exists', 'Book exists!')
 
     def new_book_borrow(self):
         ui = self.ui
@@ -326,9 +326,9 @@ class Ui(QtWidgets.QMainWindow):
         success = new_borrow(lib_no, book_id, today, return_date)
 
         if success == 'blacklisted':
-            self.error_message('The book is currently blacklisted', "Blacklisted")
+            error_message('The book is currently blacklisted', "Blacklisted")
         elif success == 'active':
-            self.error_message('Return the previous book first', "Invalid")
+            error_message('Return the previous book first', "Invalid")
         else:
             self.populate_borrow_book_table()
             self.btnClearBookBorrow.click()
@@ -436,6 +436,15 @@ class Ui(QtWidgets.QMainWindow):
         completer.setCaseSensitivity(Qt.CaseInsensitive)
         lineedit.setCompleter(completer)
 
+# ================================== menus =============================================
+    def update_profile_menu(self):
+        menu = QMenu()
+        menu.addAction(qta.icon('fa5.edit'), 'Edit profile', self.update_user_profile, 'ctrl+e')
+        menu.addAction(qta.icon('fa5s.key'), 'Change password', self.change_user_password)
+        return menu
+
+    # ==================================== table menus ====================================
+
     def borrow_table_menu(self, position):
 
         menu = QMenu()
@@ -459,91 +468,6 @@ class Ui(QtWidgets.QMainWindow):
         menu.addAction(qta.icon('fa5s.arrow-up'), 'Promote class', lambda: self.promote_indv_student(lib_no))
         menu.addAction(qta.icon('fa5s.arrow-down'), 'demote class', lambda: self.demote_indv_student(lib_no))
         menu.exec_(self.ui.tblStudent.mapToGlobal(position))
-
-    def update_profile_menu(self):
-        menu = QMenu()
-        menu.addAction(qta.icon('fa5.edit'), 'Edit profile', self.update_user_profile, 'ctrl+e')
-        menu.addAction(qta.icon('fa5s.key'), 'Change password', self.change_user_password)
-        return menu
-
-    # ===================================== student menu action ===================================
-    def edit_student_details(self):
-        row = self.tblStudent.currentRow()
-        lib_no = self.tblStudent.item(row, 0).text()
-        name = self.tblStudent.item(row, 1).text().split(' ')
-        student_class = self.tblStudent.item(row, 2).text().split(' ')
-
-        if len(name) == 3:
-            fname = name[0]
-            sname = name[1]
-            oname = name[2]
-
-        else:
-            fname = name[0]
-            sname = name[1]
-            oname = ''
-
-        self.txtNewLibNo.setText(lib_no)
-        self.txtStdFname.setText(fname)
-        self.txtStdSname.setText(sname)
-        self.txtStdOname.setText(oname)
-        self.txtStdClass.setText(student_class[0])
-        self.txtStdStream.setText(student_class[1])
-
-        self.btnSaveStd.setText('Update')
-
-    def promote_indv_student(self, lib_no):
-        result = promote_individal_student(lib_no,'promote')
-        if result:
-            success_message(f'Student {lib_no} promoted', 'promoted')
-            self.populate_student_table()
-        else:
-            error_message('Internal errror occured please contact admin for more details', 'Internal error')
-
-    def demote_indv_student(self, lib_no):
-        result = promote_individal_student(lib_no, 'demote')
-        if result:
-            success_message(f'Student {lib_no} demoted', 'promoted')
-            self.populate_student_table()
-        else:
-            error_message('Internal error occurred please contact admin for more details', 'Internal error')
-
-    def promote_all(self):
-        result = promote_all_students('promote')
-        if result:
-            success_message(f'Students promoted', 'Promoted')
-            self.populate_student_table()
-        else:
-            error_message('Internal error occurred please contact admin for more details', 'Internal error')
-
-    def demote_all(self):
-        result = promote_all_students('demote')
-        if result:
-            success_message(f'Students demoted', 'Promoted')
-            self.populate_student_table()
-        else:
-            error_message('Internal error occurred please contact admin for more details', 'Internal error')
-
-    def blacklist_user(self, lib_no):
-        dlg = BlacklistReason(self)
-        dlg.exec_()
-
-        if dlg.result():
-            reason = dlg.blacklistReason.toPlainText()
-            if blacklist_user(lib_no, reason):
-                self.success_message(f'User <b>{lib_no}</b> has been blacklisted', 'Success')
-
-    def unblacklist_user(self, lib_no):
-        if unblacklist_user(lib_no):
-            success_message(f'Use <b>{lib_no}</b> has been removed from blacklisting list', 'Unblacklisted')
-
-    def update_user_profile(self):
-        dlg = UpdateProfile(self, lib_no=self.logged_user.upper())
-        dlg.exec_()
-
-    def change_user_password(self):
-        dlg = ChangePassword(self, lib_no=self.logged_user.upper())
-        dlg.exec_()
 
     def book_table_menu(self, position):
         menu = QMenu()
@@ -578,6 +502,93 @@ class Ui(QtWidgets.QMainWindow):
 
         menu.exec_(self.ui.tblStaff.mapToGlobal(position))
 
+    def report_table_menu(self, position):
+        menu = QMenu()
+        menu.addAction('View graph', self.create_book_usage_graph)
+        menu.exec_(self.ui.tblReport.mapToGlobal(position))
+
+# ============================== Menu actions ====================================================
+    # ===================================== student menu action ===================================
+    def edit_student_details(self):
+        row = self.tblStudent.currentRow()
+        lib_no = self.tblStudent.item(row, 0).text()
+        name = self.tblStudent.item(row, 1).text().split(' ')
+        student_class = self.tblStudent.item(row, 2).text().split(' ')
+
+        if len(name) == 3:
+            fname = name[0]
+            sname = name[1]
+            oname = name[2]
+
+        else:
+            fname = name[0]
+            sname = name[1]
+            oname = ''
+
+        self.txtNewLibNo.setText(lib_no)
+        self.txtStdFname.setText(fname)
+        self.txtStdSname.setText(sname)
+        self.txtStdOname.setText(oname)
+        self.txtStdClass.setText(student_class[0])
+        self.txtStdStream.setText(student_class[1])
+
+        self.btnSaveStd.setText('Update')
+
+    def promote_indv_student(self, lib_no):
+        result = promote_individal_student(lib_no, 'promote')
+        if result:
+            success_message(f'Student {lib_no} promoted', 'promoted')
+            self.populate_student_table()
+        else:
+            error_message('Internal errror occured please contact admin for more details', 'Internal error')
+
+    def demote_indv_student(self, lib_no):
+        result = promote_individal_student(lib_no, 'demote')
+        if result:
+            success_message(f'Student {lib_no} demoted', 'promoted')
+            self.populate_student_table()
+        else:
+            error_message('Internal error occurred please contact admin for more details', 'Internal error')
+
+    def promote_all(self):
+        result = promote_all_students('promote')
+        if result:
+            success_message(f'Students promoted', 'Promoted')
+            self.populate_student_table()
+        else:
+            error_message('Internal error occurred please contact admin for more details', 'Internal error')
+
+    def demote_all(self):
+        result = promote_all_students('demote')
+        if result:
+            success_message(f'Students demoted', 'Promoted')
+            self.populate_student_table()
+        else:
+            error_message('Internal error occurred please contact admin for more details', 'Internal error')
+
+    # =================================== student + staff menu action =======================================
+    def blacklist_user(self, lib_no):
+        dlg = BlacklistReason(self)
+        dlg.exec_()
+
+        if dlg.result():
+            reason = dlg.blacklistReason.toPlainText()
+            if blacklist_user(lib_no, reason):
+                success_message(f'User <b>{lib_no}</b> has been blacklisted', 'Success')
+
+    def unblacklist_user(self, lib_no):
+        if unblacklist_user(lib_no):
+            success_message(f'Use <b>{lib_no}</b> has been removed from blacklisting list', 'Unblacklisted')
+
+    # ================================== update profile actions =====================================
+    def update_user_profile(self):
+        dlg = UpdateProfile(self, lib_no=self.logged_user.upper())
+        dlg.exec_()
+
+    def change_user_password(self):
+        dlg = ChangePassword(self, lib_no=self.logged_user.upper())
+        dlg.exec_()
+
     # ================================== staff menu actions ====================================
 
     def add_admin(self):
@@ -608,13 +619,7 @@ class Ui(QtWidgets.QMainWindow):
 
         self.stfSaveDetails.setText('update')
 
-    # ========================================================================================
-
-    def report_table_menu(self, position):
-        menu = QMenu()
-        menu.addAction('View graph', self.create_book_usage_graph)
-        menu.exec_(self.ui.tblReport.mapToGlobal(position))
-
+    # ================================ book table menu actions ====================================
     def blacklist(self, book_id):
         dlg = BlacklistReason(self)
         dlg.exec_()
@@ -622,15 +627,35 @@ class Ui(QtWidgets.QMainWindow):
         if dlg.result():
             reason = dlg.blacklistReason.toPlainText()
             if blacklist(book_id, reason):
-                self.success_message(f'Book <b>{book_id}</b> has been blacklisted', 'Success')
+                success_message(f'Book <b>{book_id}</b> has been blacklisted', 'Success')
 
     def unblacklist(self, book_id):
         if unblacklist(book_id):
-            self.success_message(f'Book have been <b>{book_id}</b> unblacklisted', 'Success')
+            success_message(f'Book have been <b>{book_id}</b> unblacklisted', 'Success')
 
-    def icon(self, icon_name, color='white', scale=1):
-        return qta.icon(icon_name, color=color, scale_factor=scale)
+    def edit_books(self):
+        row = self.tblBooks.currentRow()
+        book_id = self.tblBooks.item(row, 0).text()
+        book_name = self.tblBooks.item(row, 1).text()
+        book_category = self.tblBooks.item(row, 2).text()
+        date_added = self.tblBooks.item(row, 3).text()
 
+        self.bookIdDetails.setText(book_id)
+        self.bookNameDetails.setText(book_name)
+        self.dayBookAdded.setDate(dt.strptime(date_added, '%Y-%m-%d'))
+        self.cmbBookCategory.setCurrentText(book_category.capitalize())
+
+    # ================================= book borrowed menu actions ================================
+    def book_return(self):
+        lib_no = self.tblBorrow.item(self.tblBorrow.currentRow(), 0).text()
+        book_no = self.tblBorrow.item(self.tblBorrow.currentRow(), 2).text()
+        success = return_book(lib_no, book_no)
+        if success:
+            self.populate_borrow_book_table()
+
+    # =============================================================================================
+
+    # =================================== menu bar switcher =======================================
     def activeButton(self, currentButton):
         if currentButton.objectName() == 'btnLibSession':
             self.pages.setCurrentWidget(self.pgLibSession)
@@ -650,25 +675,7 @@ class Ui(QtWidgets.QMainWindow):
         currentButton.setStyleSheet('padding-left:10px;border:none;padding-right:5px;')
         self.previousButton = currentButton
 
-    def book_return(self):
-        lib_no = self.tblBorrow.item(self.tblBorrow.currentRow(), 0).text()
-        book_no = self.tblBorrow.item(self.tblBorrow.currentRow(), 2).text()
-        success = return_book(lib_no, book_no)
-        if success:
-            self.populate_borrow_book_table()
-
-    def edit_books(self):
-        row = self.tblBooks.currentRow()
-        book_id = self.tblBooks.item(row, 0).text()
-        book_name = self.tblBooks.item(row, 1).text()
-        book_category = self.tblBooks.item(row, 2).text()
-        date_added = self.tblBooks.item(row, 3).text()
-
-        self.bookIdDetails.setText(book_id)
-        self.bookNameDetails.setText(book_name)
-        self.dayBookAdded.setDate(dt.strptime(date_added, '%Y-%m-%d'))
-        self.cmbBookCategory.setCurrentText(book_category.capitalize())
-
+    # ================================== Reporting section ==========================================
     def range_report(self):
         from_date = self.fromDate.date().toPyDate()
         to_date = self.toDate.date().toPyDate()
@@ -707,18 +714,16 @@ class Ui(QtWidgets.QMainWindow):
         graph_widget = pg.PlotWidget()
         return graph_widget
 
+    # ============================ assistive functions =========================================
+    def icon(self, icon_name, color='white', scale=1):
+        return qta.icon(icon_name, color=color, scale_factor=scale)
+
     def createtable(self, table, columns):
         table.setColumnCount(len(columns))
         table.setHorizontalHeaderLabels(columns)
 
-    def error_message(self, message, box_title):
-        msg = QMessageBox(QMessageBox.Critical, box_title, message)
-        msg.setStyleSheet('background-color:#800000;color:white;font-size:15px')
-
-        self.setWindowOpacity(0.5)
-        msg.exec_()
-        self.setWindowOpacity(1)
-
+# ================================= fields customisation ========================================
+    # ========================= reporting section =============================================
     def set_min_and_max_date(self):
         date_list = get_date_list(borrowing_history(), 3)
         self.fromDate.setMinimumDate(min(date_list))
@@ -728,6 +733,7 @@ class Ui(QtWidgets.QMainWindow):
         self.onDate.setMinimumDate(max(date_list))
         self.onDate.setMaximumDate(max(date_list))
 
+# ============================= Authentication ====================================================
     def login(self):
         dlg = Login(self)
         self.setWindowOpacity(0)
@@ -745,14 +751,13 @@ class Ui(QtWidgets.QMainWindow):
 
         self.setWindowOpacity(1)
 
-    def success_message(self, message, box_title):
-        msg = QMessageBox(QMessageBox.Information, box_title, message)
-        msg.setStyleSheet('background-color:#800000;color:white;font-size:15px')
-        self.setWindowOpacity(0.5)
-        msg.exec_()
-        self.setWindowOpacity(1)
+
+# =========================== running the app =====================================
+def main():
+    app = QtWidgets.QApplication(sys.argv)
+    Ui()
+    app.exec_()
 
 
-app = QtWidgets.QApplication(sys.argv)
-window = Ui()
-app.exec_()
+if __name__ == '__main__':
+    main()
