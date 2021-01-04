@@ -164,7 +164,7 @@ padding-right:5px;</string>
          </property>
          <property name="icon">
           <iconset theme="icon.jpg">
-           <normaloff>../../../../../../../../../../../../../.designer/backup</normaloff>../../../../../../../../../../../../../.designer/backup</iconset>
+           <normaloff>../../../../../../../../../../../../../../.designer/backup</normaloff>../../../../../../../../../../../../../../.designer/backup</iconset>
          </property>
          <property name="autoDefault">
           <bool>true</bool>
@@ -477,7 +477,7 @@ font-size:13px;</string>
          </property>
          <property name="icon">
           <iconset>
-           <normalon>../../../../../../../../.designer/backup/settings2.svg</normalon>
+           <normalon>../../../../../../../../../.designer/backup/settings2.svg</normalon>
           </iconset>
          </property>
         </widget>
@@ -516,7 +516,7 @@ font-size:13px;</string>
 </string>
       </property>
       <property name="currentIndex">
-       <number>5</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="pgLibSession">
        <property name="sizePolicy">
@@ -967,14 +967,14 @@ font-weight:bold;
            </item>
            <item>
             <layout class="QFormLayout" name="formLayout_2">
-             <item row="0" column="0">
+             <item row="1" column="0">
               <widget class="QLabel" name="label_24">
                <property name="text">
                 <string>First Name:</string>
                </property>
               </widget>
              </item>
-             <item row="0" column="1">
+             <item row="1" column="1">
               <widget class="QLineEdit" name="stfFirstName">
                <property name="styleSheet">
                 <string notr="true">border-radius:5px;
@@ -987,14 +987,14 @@ color:black;
                </property>
               </widget>
              </item>
-             <item row="1" column="0">
+             <item row="2" column="0">
               <widget class="QLabel" name="label_25">
                <property name="text">
                 <string>Second Name:</string>
                </property>
               </widget>
              </item>
-             <item row="1" column="1">
+             <item row="2" column="1">
               <widget class="QLineEdit" name="stfSecondName">
                <property name="styleSheet">
                 <string notr="true">border-radius:5px;
@@ -1007,14 +1007,14 @@ color:black;
                </property>
               </widget>
              </item>
-             <item row="2" column="0">
+             <item row="3" column="0">
               <widget class="QLabel" name="label_26">
                <property name="text">
                 <string>Other Name:</string>
                </property>
               </widget>
              </item>
-             <item row="2" column="1">
+             <item row="3" column="1">
               <widget class="QLineEdit" name="stfOtherName">
                <property name="styleSheet">
                 <string notr="true">border-radius:5px;
@@ -1027,14 +1027,28 @@ color:black;
                </property>
               </widget>
              </item>
-             <item row="3" column="0">
+             <item row="4" column="0">
               <widget class="QLabel" name="label_23">
                <property name="text">
                 <string>Phone Number:</string>
                </property>
               </widget>
              </item>
-             <item row="3" column="1">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_34">
+               <property name="text">
+                <string>Lib No</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLineEdit" name="stfLibNo">
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
               <widget class="QLineEdit" name="stfPhoneNo">
                <property name="styleSheet">
                 <string notr="true">border-radius:5px;
@@ -1052,19 +1066,25 @@ color:black;
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_21">
              <item>
+              <spacer name="horizontalSpacer_4">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
               <widget class="QPushButton" name="clearStaffDetails">
                <property name="styleSheet">
                 <string notr="true"/>
                </property>
                <property name="text">
                 <string>Clear</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_22">
-               <property name="text">
-                <string>Delete</string>
                </property>
               </widget>
              </item>
@@ -1253,8 +1273,8 @@ color:black;
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>520</width>
-             <height>428</height>
+             <width>96</width>
+             <height>26</height>
             </rect>
            </property>
           </widget>
@@ -1781,28 +1801,27 @@ font-size:16px;
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_11">
              <item>
-              <widget class="QPushButton" name="pushButton_10">
+              <spacer name="horizontalSpacer_3">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnDemoteAll">
                <property name="text">
-                <string>Clear Table</string>
+                <string>Demote All</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_9">
-               <property name="text">
-                <string>Remove</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_12">
-               <property name="text">
-                <string>Promote Selected</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_11">
+              <widget class="QPushButton" name="btnPromoteAll">
                <property name="text">
                 <string>Promote All</string>
                </property>
@@ -2168,13 +2187,13 @@ font-size:16px;
   </widget>
  </widget>
  <tabstops>
-  <tabstop>bookIdDetails</tabstop>
-  <tabstop>bookNameDetails</tabstop>
-  <tabstop>cmbBookCategory</tabstop>
-  <tabstop>btnSaveBook</tabstop>
   <tabstop>stfFirstName</tabstop>
   <tabstop>stfSecondName</tabstop>
+  <tabstop>stfOtherName</tabstop>
+  <tabstop>stfPhoneNo</tabstop>
+  <tabstop>stfSaveDetails</tabstop>
   <tabstop>txtLibNoBorrow</tabstop>
+  <tabstop>cmbBookCategory</tabstop>
   <tabstop>txtBookIdBorrow</tabstop>
   <tabstop>dtReturnDateBorrow</tabstop>
   <tabstop>btnBorrowBook</tabstop>
@@ -2188,10 +2207,7 @@ font-size:16px;
   <tabstop>tblStudent</tabstop>
   <tabstop>txtStudentSearch</tabstop>
   <tabstop>btnStudentFilter</tabstop>
-  <tabstop>pushButton_9</tabstop>
-  <tabstop>pushButton_10</tabstop>
-  <tabstop>pushButton_11</tabstop>
-  <tabstop>pushButton_12</tabstop>
+  <tabstop>btnPromoteAll</tabstop>
   <tabstop>pushButton_6</tabstop>
   <tabstop>pushButton_8</tabstop>
   <tabstop>clearStudentDetails</tabstop>
@@ -2209,21 +2225,36 @@ font-size:16px;
   <tabstop>pushButton_19</tabstop>
   <tabstop>dayBookAdded</tabstop>
   <tabstop>btnSettings</tabstop>
-  <tabstop>pushButton_22</tabstop>
   <tabstop>tblStaff</tabstop>
   <tabstop>txtStaffSearch</tabstop>
   <tabstop>pushButton_28</tabstop>
   <tabstop>pushButton_29</tabstop>
   <tabstop>pushButton_30</tabstop>
   <tabstop>pushButton_31</tabstop>
-  <tabstop>stfOtherName</tabstop>
+  <tabstop>bookIdDetails</tabstop>
   <tabstop>txtUserNameBorrow</tabstop>
-  <tabstop>stfPhoneNo</tabstop>
+  <tabstop>bookNameDetails</tabstop>
   <tabstop>txtBookNameBorrow</tabstop>
-  <tabstop>stfSaveDetails</tabstop>
+  <tabstop>btnSaveBook</tabstop>
   <tabstop>btnClearBookBorrow</tabstop>
   <tabstop>txtBorrowSearch</tabstop>
   <tabstop>clearStaffDetails</tabstop>
+  <tabstop>btnBooks</tabstop>
+  <tabstop>btnReport</tabstop>
+  <tabstop>btnLogout</tabstop>
+  <tabstop>btnUsers</tabstop>
+  <tabstop>stfLibNo</tabstop>
+  <tabstop>graphScroll</tabstop>
+  <tabstop>fromDate</tabstop>
+  <tabstop>toDate</tabstop>
+  <tabstop>generateRangeReport</tabstop>
+  <tabstop>onDate</tabstop>
+  <tabstop>generateOnReport</tabstop>
+  <tabstop>tblReport</tabstop>
+  <tabstop>txtTotalBooks</tabstop>
+  <tabstop>txtNewLibNo</tabstop>
+  <tabstop>btnDemoteAll</tabstop>
+  <tabstop>spinBox</tabstop>
  </tabstops>
  <resources>
   <include location="Resources/resources.qrc"/>
@@ -2236,12 +2267,12 @@ font-size:16px;
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>234</x>
-     <y>336</y>
+     <x>105</x>
+     <y>79</y>
     </hint>
     <hint type="destinationlabel">
-     <x>220</x>
-     <y>112</y>
+     <x>105</x>
+     <y>79</y>
     </hint>
    </hints>
   </connection>
@@ -2252,12 +2283,12 @@ font-size:16px;
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>243</x>
-     <y>336</y>
+     <x>105</x>
+     <y>79</y>
     </hint>
     <hint type="destinationlabel">
-     <x>228</x>
-     <y>146</y>
+     <x>105</x>
+     <y>79</y>
     </hint>
    </hints>
   </connection>
@@ -2268,12 +2299,12 @@ font-size:16px;
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>252</x>
-     <y>335</y>
+     <x>105</x>
+     <y>79</y>
     </hint>
     <hint type="destinationlabel">
-     <x>247</x>
-     <y>180</y>
+     <x>105</x>
+     <y>79</y>
     </hint>
    </hints>
   </connection>
@@ -2284,12 +2315,12 @@ font-size:16px;
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>269</x>
-     <y>334</y>
+     <x>105</x>
+     <y>79</y>
     </hint>
     <hint type="destinationlabel">
-     <x>271</x>
-     <y>220</y>
+     <x>105</x>
+     <y>79</y>
     </hint>
    </hints>
   </connection>
@@ -2300,12 +2331,12 @@ font-size:16px;
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>207</x>
-     <y>335</y>
+     <x>105</x>
+     <y>79</y>
     </hint>
     <hint type="destinationlabel">
-     <x>203</x>
-     <y>258</y>
+     <x>105</x>
+     <y>79</y>
     </hint>
    </hints>
   </connection>
@@ -2316,12 +2347,92 @@ font-size:16px;
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>259</x>
-     <y>342</y>
+     <x>105</x>
+     <y>79</y>
     </hint>
     <hint type="destinationlabel">
-     <x>261</x>
-     <y>287</y>
+     <x>105</x>
+     <y>79</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearStaffDetails</sender>
+   <signal>clicked()</signal>
+   <receiver>stfOtherName</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>90</x>
+     <y>310</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>313</x>
+     <y>232</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearStaffDetails</sender>
+   <signal>clicked()</signal>
+   <receiver>stfSecondName</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>66</x>
+     <y>310</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>341</x>
+     <y>196</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearStaffDetails</sender>
+   <signal>clicked()</signal>
+   <receiver>stfFirstName</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>105</x>
+     <y>310</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>348</x>
+     <y>160</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearStaffDetails</sender>
+   <signal>clicked()</signal>
+   <receiver>stfPhoneNo</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>119</x>
+     <y>310</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>322</x>
+     <y>268</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearStaffDetails</sender>
+   <signal>clicked()</signal>
+   <receiver>stfLibNo</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>91</x>
+     <y>285</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>208</x>
+     <y>120</y>
     </hint>
    </hints>
   </connection>

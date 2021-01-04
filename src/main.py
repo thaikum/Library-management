@@ -62,7 +62,8 @@ class UpdateProfile(QDialog):
         self.updateSName.setText(details[1].capitalize())
         self.updateOName.setText(details[2].capitalize())
         self.updatePhone.setText(details[3])
-        self.lblUserName.setText(details[0].capitalize()+' '+details[1].capitalize()+' '+details[2].capitalize())
+        self.lblUserName.setText(
+            details[0].capitalize() + ' ' + details[1].capitalize() + ' ' + details[2].capitalize())
 
     def update(self):
         first_name = self.updateFName.text().upper()
@@ -168,7 +169,6 @@ class Ui(QtWidgets.QMainWindow):
         self.ui.btnSaveBook.clicked.connect(self.add_new_book)
         self.ui.btnBorrowBook.clicked.connect(self.new_book_borrow)
 
-
         # ================== Some constraints to enable/disable buttons ===========================
         self.txtLibNoBorrow.editingFinished.connect(self.validate_lib_user)
         self.txtBookIdBorrow.editingFinished.connect(self.validate_book)
@@ -242,6 +242,15 @@ class Ui(QtWidgets.QMainWindow):
         self.populate_student_table()
         self.populate_borrow_book_table()
 
+        # ============================== student page buttons ==========================
+
+        self.btnPromoteAll.clicked.connect(self.promote_all)
+        self.btnDemoteAll.clicked.connect(self.demote_all)
+
+        # ============================== staff page buttons ============================
+
+        self.clearStaffDetails.clicked.connect(lambda: self.stfSaveDetails.setText('Save'))
+
         # =================================================================================
         self.showMaximized()
 
@@ -258,9 +267,8 @@ class Ui(QtWidgets.QMainWindow):
         if not lib_no:
             details = add_lib_user(fname, sname, oname, user_type, std_class=std_class, stream=stream)
 
-
         else:
-            details = add_lib_user(fname,sname,oname, user_type, std_class=std_class,stream=stream,lib_no = lib_no)
+            details = add_lib_user(fname, sname, oname, user_type, std_class=std_class, stream=stream, lib_no=lib_no)
 
         if details:
             ui.clearStudentDetails.click()
@@ -269,17 +277,30 @@ class Ui(QtWidgets.QMainWindow):
     def new_staff(self):
         ui = self.ui
 
+        lib_no = ui.stfLibNo.text().upper()
         fname = ui.stfFirstName.text().upper()
         sname = ui.stfSecondName.text().upper()
         oname = ui.stfOtherName.text().upper()
         user_type = 'STAFF'
         phone_no = ui.stfPhoneNo.text()
 
-        details = add_lib_user(fname, sname, oname, user_type, phone_no=phone_no)
+        if lib_no:
+            details = add_lib_user(fname, sname, oname, user_type, phone_no=phone_no,lib_no = lib_no)
+            if details:
+                success_message('staff details updated successfully', 'Details updated')
+                self.populate_staff_table()
+                self.clearStaffDetails.click()
+                self.populate_borrow_book_table()
 
-        if details:
-            ui.clearStaffDetails.click()
-            self.populate_staff_table()
+            else:
+                error_message('An internal error occurred \nPlease contact admin for more details','Could not update')
+
+        else:
+            details = add_lib_user(fname, sname, oname, user_type, phone_no=phone_no)
+
+            if details:
+                ui.clearStaffDetails.click()
+                self.populate_staff_table()
 
     def add_new_book(self):
         book_id = self.bookIdDetails.text().upper()
@@ -311,6 +332,8 @@ class Ui(QtWidgets.QMainWindow):
         else:
             self.populate_borrow_book_table()
             self.btnClearBookBorrow.click()
+
+    # ============================= populate tables functions =========================================
 
     def populate_student_table(self):
         ui = self.ui
@@ -433,7 +456,8 @@ class Ui(QtWidgets.QMainWindow):
             menu.addAction(qta.icon('fa5s.lock-open', color='red'), "ublacklist", lambda: self.unblacklist_user(lib_no))
         else:
             menu.addAction(qta.icon('fa5s.ban', color='red'), 'Blacklist', lambda: self.blacklist_user(lib_no))
-
+        menu.addAction(qta.icon('fa5s.arrow-up'), 'Promote class', lambda: self.promote_indv_student(lib_no))
+        menu.addAction(qta.icon('fa5s.arrow-down'), 'demote class', lambda: self.demote_indv_student(lib_no))
         menu.exec_(self.ui.tblStudent.mapToGlobal(position))
 
     def update_profile_menu(self):
@@ -442,7 +466,7 @@ class Ui(QtWidgets.QMainWindow):
         menu.addAction(qta.icon('fa5s.key'), 'Change password', self.change_user_password)
         return menu
 
-# ===================================== student menu action ===================================
+    # ===================================== student menu action ===================================
     def edit_student_details(self):
         row = self.tblStudent.currentRow()
         lib_no = self.tblStudent.item(row, 0).text()
@@ -468,6 +492,38 @@ class Ui(QtWidgets.QMainWindow):
 
         self.btnSaveStd.setText('Update')
 
+    def promote_indv_student(self, lib_no):
+        result = promote_individal_student(lib_no,'promote')
+        if result:
+            success_message(f'Student {lib_no} promoted', 'promoted')
+            self.populate_student_table()
+        else:
+            error_message('Internal errror occured please contact admin for more details', 'Internal error')
+
+    def demote_indv_student(self, lib_no):
+        result = promote_individal_student(lib_no, 'demote')
+        if result:
+            success_message(f'Student {lib_no} demoted', 'promoted')
+            self.populate_student_table()
+        else:
+            error_message('Internal error occurred please contact admin for more details', 'Internal error')
+
+    def promote_all(self):
+        result = promote_all_students('promote')
+        if result:
+            success_message(f'Students promoted', 'Promoted')
+            self.populate_student_table()
+        else:
+            error_message('Internal error occurred please contact admin for more details', 'Internal error')
+
+    def demote_all(self):
+        result = promote_all_students('demote')
+        if result:
+            success_message(f'Students demoted', 'Promoted')
+            self.populate_student_table()
+        else:
+            error_message('Internal error occurred please contact admin for more details', 'Internal error')
+
     def blacklist_user(self, lib_no):
         dlg = BlacklistReason(self)
         dlg.exec_()
@@ -479,7 +535,7 @@ class Ui(QtWidgets.QMainWindow):
 
     def unblacklist_user(self, lib_no):
         if unblacklist_user(lib_no):
-            success_message(f'Use <b>{lib_no}</b> has been removed from blacklisting list','Unblacklisted')
+            success_message(f'Use <b>{lib_no}</b> has been removed from blacklisting list', 'Unblacklisted')
 
     def update_user_profile(self):
         dlg = UpdateProfile(self, lib_no=self.logged_user.upper())
@@ -511,15 +567,48 @@ class Ui(QtWidgets.QMainWindow):
 
     def staff_table_menu(self, position):
         menu = QMenu()
-        menu.addAction(self.icon('fa5s.user-plus', color='black'), 'Add as admin', self.add_admin)
+        user_type = self.tblStaff.item(self.tblStaff.currentRow(), 3).text().lower()
+        if user_type == 'super admin':
+            pass
+        elif user_type == 'admin':
+            menu.addAction(self.icon('fa5s.user-minus', color='black'), 'Remove admin', self.remove_admin)
+        else:
+            menu.addAction(self.icon('fa5s.user-plus', color='black'), 'Add as admin', self.add_admin)
+        menu.addAction(self.icon('fa5.edit', color='black'), 'Edit details', self.edit_staff_details)
+
         menu.exec_(self.ui.tblStaff.mapToGlobal(position))
 
+    # ================================== staff menu actions ====================================
+
     def add_admin(self):
-        lib_no = self.tblStaff.item(self.tblStaff.currentRow(), 0).text()
+        lib_no = self.tblStaff.item(self.tblStaff.currentRow(), 0).text().upper()
         if create_admin(lib_no):
-            self.success_message(f"lib number {lib_no} activated successifully as admin", 'Admin added')
+            success_message(f"lib number {lib_no} activated successifully as admin", 'Admin added')
+            self.populate_staff_table()
         else:
-            self.error_message('an internal error ocurred', 'Fatal')
+            error_message('an internal error occurred', 'Fatal')
+
+    def remove_admin(self):
+        lib_no = self.tblStaff.item(self.tblStaff.currentRow(), 0).text().upper()
+        if de_admin(lib_no):
+            success_message(f'Admin {lib_no} was deactivated', 'Admin deactivated')
+            self.populate_staff_table()
+        else:
+            error_message('Internal error occurred', 'Internal error')
+
+    def edit_staff_details(self):
+        lib_no = self.tblStaff.item(self.tblStaff.currentRow(), 0).text().upper()
+        details = get_staff_details(lib_no)
+
+        self.stfFirstName.setText(details[0].capitalize())
+        self.stfSecondName.setText(details[1].capitalize())
+        self.stfOtherName.setText(details[2].capitalize())
+        self.stfPhoneNo.setText(details[3].capitalize())
+        self.stfLibNo.setText(lib_no)
+
+        self.stfSaveDetails.setText('update')
+
+    # ========================================================================================
 
     def report_table_menu(self, position):
         menu = QMenu()
