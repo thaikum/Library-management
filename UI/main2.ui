@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1077</width>
+    <width>1118</width>
     <height>500</height>
    </rect>
   </property>
@@ -35,11 +35,7 @@
    <string>Kambirwa Primary School Community Library</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background: #800000;
-color: rgb(255,255,255);
-font-size:12;
-
-</string>
+   <string notr="true"/>
   </property>
   <property name="tabShape">
    <enum>QTabWidget::Rounded</enum>
@@ -61,13 +57,27 @@ font-size:12;
     <enum>Qt::LeftToRight</enum>
    </property>
    <property name="styleSheet">
-    <string notr="true">QLineEdit {
+    <string notr="true">
+
+#centralwidget {
+	background: #FFBC54;
+}
+
+QLineEdit {
     border-radius:5px;
     margin:0px;
     background-color:rgba(255,255,255,0.5);
     margin-bottom:10px;
     padding-left:3px;
     color:black;
+}
+
+QLineEdit[readOnly=&quot;true&quot;] {
+	border-color:red;
+} 
+
+QPushButton:focus {
+	outline: 0;
 }
 
 QPushButton:hover {
@@ -93,6 +103,10 @@ QCheckBox::indicator:unchecked{
 QCheckBox::indicator:checked {
     image: url(:images/checkbox.png);
 }
+
+QTableWidget {
+	border: none;
+}
 	</string>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_11">
@@ -116,7 +130,7 @@ QCheckBox::indicator:checked {
       <property name="styleSheet">
        <string notr="true"/>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0,0,0,0,0,0">
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0,0,0,0,0,0,0">
        <property name="spacing">
         <number>0</number>
        </property>
@@ -164,7 +178,7 @@ padding-right:5px;</string>
          </property>
          <property name="icon">
           <iconset theme="icon.jpg">
-           <normaloff>../../../../../../../../../../../../../../.designer/backup</normaloff>../../../../../../../../../../../../../../.designer/backup</iconset>
+           <normaloff>../../../../../../../../../../../../../../../.designer/backup</normaloff>../../../../../../../../../../../../../../../.designer/backup</iconset>
          </property>
          <property name="autoDefault">
           <bool>true</bool>
@@ -305,6 +319,51 @@ padding-right:5px;</string>
          <property name="icon">
           <iconset>
            <normalon>:/images/statistics.png</normalon>
+          </iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>24</width>
+           <height>24</height>
+          </size>
+         </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnHistory">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>200</width>
+           <height>38</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">padding-left:10px;
+padding-right:5px;</string>
+         </property>
+         <property name="text">
+          <string>History</string>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normalon>:/images/ancient-scroll.png</normalon>
           </iconset>
          </property>
          <property name="iconSize">
@@ -477,7 +536,7 @@ font-size:13px;</string>
          </property>
          <property name="icon">
           <iconset>
-           <normalon>../../../../../../../../../.designer/backup/settings2.svg</normalon>
+           <normalon>../../../../../../../../../../.designer/backup/settings2.svg</normalon>
           </iconset>
          </property>
         </widget>
@@ -1273,8 +1332,8 @@ color:black;
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>96</width>
-             <height>26</height>
+             <width>540</width>
+             <height>428</height>
             </rect>
            </property>
           </widget>
@@ -1450,6 +1509,111 @@ color:black;
            </layout>
           </item>
          </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="pgHistory">
+       <layout class="QHBoxLayout" name="horizontalLayout_30" stretch="1,3,1">
+        <item>
+         <spacer name="horizontalSpacer_7">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_12">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_29">
+            <item>
+             <widget class="QLineEdit" name="txtSearchHistory">
+              <property name="placeholderText">
+               <string>Search...</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnLoadHistory">
+              <property name="minimumSize">
+               <size>
+                <width>100</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>load Data</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QTableWidget" name="tblHistory">
+            <column>
+             <property name="text">
+              <string>Lib No</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>User name</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Book Id</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Book Name</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Date borrowed</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Date returned</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_6">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </widget>
@@ -2363,7 +2527,7 @@ font-size:16px;
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>90</x>
+     <x>263</x>
      <y>310</y>
     </hint>
     <hint type="destinationlabel">
@@ -2379,7 +2543,7 @@ font-size:16px;
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>66</x>
+     <x>246</x>
      <y>310</y>
     </hint>
     <hint type="destinationlabel">
@@ -2395,7 +2559,7 @@ font-size:16px;
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>105</x>
+     <x>263</x>
      <y>310</y>
     </hint>
     <hint type="destinationlabel">
@@ -2411,7 +2575,7 @@ font-size:16px;
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>119</x>
+     <x>263</x>
      <y>310</y>
     </hint>
     <hint type="destinationlabel">
@@ -2427,12 +2591,60 @@ font-size:16px;
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>91</x>
-     <y>285</y>
+     <x>263</x>
+     <y>310</y>
     </hint>
     <hint type="destinationlabel">
      <x>208</x>
      <y>120</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearBookDetails</sender>
+   <signal>clicked()</signal>
+   <receiver>dayBookAdded</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>62</x>
+     <y>299</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>172</x>
+     <y>187</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearBookDetails</sender>
+   <signal>clicked()</signal>
+   <receiver>bookNameDetails</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>46</x>
+     <y>309</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>265</x>
+     <y>155</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearBookDetails</sender>
+   <signal>clicked()</signal>
+   <receiver>bookIdDetails</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>36</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>310</x>
+     <y>117</y>
     </hint>
    </hints>
   </connection>

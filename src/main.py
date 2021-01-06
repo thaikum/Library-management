@@ -1,19 +1,15 @@
-import hashlib
 import string
 import sys
 import time
 import pyqtgraph as pg
-import numpy as np
 
 import qtawesome as qta
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import *
 
-from src.book import new_book, blacklist, unblacklist
-from src.book_borrow import new_borrow, all_borrows, return_book, is_blacklisted, range_selection, \
-    range_selection_by_date, \
-    borrowing_history
+from src.book import *
+from src.book_borrow import *
 from src.helper import *
 from src.lib_user import *
 from src import resources
@@ -143,6 +139,8 @@ class Ui(QtWidgets.QMainWindow):
     global_staff_list = []
     logged_user: string = ''
     logged_user_type: string = ''
+    global_history = []
+    global_student_list = []
 
     def __init__(self):
         super(Ui, self).__init__()
@@ -162,6 +160,7 @@ class Ui(QtWidgets.QMainWindow):
         self.ui.btnStaff.clicked.connect(lambda: self.activeButton(self.btnStaff))
         self.ui.btnSettings.clicked.connect(lambda: self.activeButton(self.btnSettings))
         self.ui.btnReport.clicked.connect(lambda: self.activeButton(self.btnReport))
+        self.ui.btnHistory.clicked.connect(lambda: self.activeButton(self.btnHistory))
 
         # ============================== Saving data to the database ===============================
         self.ui.btnSaveStd.clicked.connect(self.new_student)
@@ -216,15 +215,52 @@ class Ui(QtWidgets.QMainWindow):
         self.txtStudentSearch.setPlaceholderText('Search...')
 
         self.txtBookSearch.textChanged.connect(
-            lambda: self.insert_into_table(self.tblBooks, search(self.global_book_list, self.txtBookSearch.text())))
-        self.txtBorrowSearch.textChanged.connect(lambda: self.insert_into_table(self.tblBorrow,
-                                                                                search(self.global_book_borrow_list,
-                                                                                       self.txtBorrowSearch.text())))
+            lambda: self.insert_into_table(
+                self.tblBooks,
+                search(
+                    self.global_book_list,
+                    self.txtBookSearch.text()
+                )
+            )
+        )
+
+        self.txtBorrowSearch.textChanged.connect(
+            lambda: self.insert_into_table(
+                self.tblBorrow,
+                search(
+                    self.global_book_borrow_list,
+                    self.txtBorrowSearch.text()
+                )
+            )
+        )
+
         self.txtStaffSearch.textChanged.connect(
-            lambda: self.insert_into_table(self.tblStaff, search(self.global_staff_list, self.txtStaffSearch.text())))
-        self.txtStudentSearch.textChanged.connect(lambda: self.insert_into_table(self.tblStudent,
-                                                                                 search(self.global_student_list,
-                                                                                        self.txtStaffSearch.tet())))
+            lambda: self.insert_into_table(
+                self.tblStaff, search(
+                    self.global_staff_list,
+                    self.txtStaffSearch.text()
+                )
+            )
+        )
+        self.txtStudentSearch.textChanged.connect(
+            lambda: self.insert_into_table(
+                self.tblStudent,
+                search(
+                    self.global_student_list,
+                    self.txtStudentSearch.text()
+                )
+            )
+        )
+
+        self.txtSearchHistory.textChanged.connect(
+            lambda: self.insert_into_table(
+                self.tblHistory,
+                search(
+                    self.global_history,
+                    self.txtSearchHistory.text()
+                )
+            )
+        )
         # =================================== Menu buttons ===============================
         self.btnUsers.setMenu(self.update_profile_menu())
 
@@ -251,6 +287,16 @@ class Ui(QtWidgets.QMainWindow):
 
         self.clearStaffDetails.clicked.connect(lambda: self.stfSaveDetails.setText('Save'))
 
+        # ============================= book page buttons =============================
+        def clear_book_details():  # switches the update book form to new book form
+            self.bookIdDetails.setReadOnly(False)
+            self.btnSaveBook.setText('Save')
+
+        self.clearBookDetails.clicked.connect(clear_book_details)
+
+        # ============================ history buttons =================================
+
+        self.btnLoadHistory.clicked.connect(self.populate_history_table)
         # =================================================================================
         self.showMaximized()
 
@@ -308,13 +354,24 @@ class Ui(QtWidgets.QMainWindow):
         date_added = self.dayBookAdded.date().toPyDate()
         book_category = self.cmbBookCategory.currentText().upper()
 
-        success = new_book(book_id, book_name, date_added, book_category)
+        if self.bookIdDetails.isReadOnly():
+            if book_update(book_id, book_name, date_added, book_category):
+                success_message('Book details update successfully', 'Book updated')
+                self.clearBookDetails.click()
+                self.populate_book_table()
+                self.populate_borrow_book_table()
+            else:
+                error_message('Book details cannot be updated', 'Cant update')
+                self.clearBookDetails.click()
 
-        if success:
-            self.clearBookDetails.click()
-            self.populate_book_table()
         else:
-            error_message('A book with such details exists', 'Book exists!')
+            success = new_book(book_id, book_name, date_added, book_category)
+
+            if success:
+                self.clearBookDetails.click()
+                self.populate_book_table()
+            else:
+                error_message('A book with such details exists', 'Book exists!')
 
     def new_book_borrow(self):
         ui = self.ui
@@ -368,6 +425,16 @@ class Ui(QtWidgets.QMainWindow):
 
         self.insert_into_table(ui.tblBorrow, borrows)
 
+    def populate_history_table(self):
+        hist = history()
+
+        if hist[0]:
+            self.global_history = hist[1]
+            self.insert_into_table(self.tblHistory, hist[1])
+        else:
+            error_message('Internal error occurred please contact admin for more details', 'Fatal')
+
+    # ============================ table helpers ===========================
     def clear_table(self, table):
         size = table.rowCount() - 1
         while size >= 0:
@@ -436,7 +503,7 @@ class Ui(QtWidgets.QMainWindow):
         completer.setCaseSensitivity(Qt.CaseInsensitive)
         lineedit.setCompleter(completer)
 
-# ================================== menus =============================================
+    # ================================== menus =============================================
     def update_profile_menu(self):
         menu = QMenu()
         menu.addAction(qta.icon('fa5.edit'), 'Edit profile', self.update_user_profile, 'ctrl+e')
@@ -472,10 +539,11 @@ class Ui(QtWidgets.QMainWindow):
     def book_table_menu(self, position):
         menu = QMenu()
         menu.setStyleSheet('font-weight:bold;font-size:13px;')
-        removeRow = menu.addAction("Remove Book")
-        removeRow.setIcon(qta.icon('fa5.check-circle'))
-        editRecord = menu.addAction('Edit details')
-        editRecord.setIcon(qta.icon('fa5.edit'))
+        if self.logged_user_type == 'super':
+            menu.addAction(qta.icon('fa5.check-circle'), 'Remove book', self.remove_selected_book)
+
+        menu.addAction(qta.icon('fa5.edit'), 'Edit details', self.edit_books)
+
         menu.addSeparator()
         book_id = self.tblBooks.item(self.tblBooks.currentRow(), 0).text()
         if is_blacklisted(book_id):
@@ -484,20 +552,24 @@ class Ui(QtWidgets.QMainWindow):
         else:
             menu.addAction(qta.icon('fa5s.ban', color='red'), "blacklist", lambda: self.blacklist(book_id), 'ctrl+l')
 
-        action = menu.exec_(self.ui.tblBooks.mapToGlobal(position))
-
-        if action == editRecord:
-            self.edit_books()
+        menu.exec_(self.ui.tblBooks.mapToGlobal(position))
 
     def staff_table_menu(self, position):
         menu = QMenu()
         user_type = self.tblStaff.item(self.tblStaff.currentRow(), 3).text().lower()
+        lib_no = self.tblStaff.item(self.tblStaff.currentRow(), 0).text().upper()
         if user_type == 'super admin':
             pass
         elif user_type == 'admin':
             menu.addAction(self.icon('fa5s.user-minus', color='black'), 'Remove admin', self.remove_admin)
         else:
             menu.addAction(self.icon('fa5s.user-plus', color='black'), 'Add as admin', self.add_admin)
+            if check_for_user_blacklist(lib_no):
+                menu.addAction(self.icon('fa5s.lock-open', color='red'), 'Unblacklist',
+                               lambda: self.unblacklist_user(lib_no))
+            else:
+                menu.addAction(self.icon('fa5s.ban', color='red'), 'Blacklist', lambda: self.blacklist_user(lib_no))
+
         menu.addAction(self.icon('fa5.edit', color='black'), 'Edit details', self.edit_staff_details)
 
         menu.exec_(self.ui.tblStaff.mapToGlobal(position))
@@ -507,7 +579,7 @@ class Ui(QtWidgets.QMainWindow):
         menu.addAction('View graph', self.create_book_usage_graph)
         menu.exec_(self.ui.tblReport.mapToGlobal(position))
 
-# ============================== Menu actions ====================================================
+    # ============================== Menu actions ====================================================
     # ===================================== student menu action ===================================
     def edit_student_details(self):
         row = self.tblStudent.currentRow()
@@ -645,6 +717,18 @@ class Ui(QtWidgets.QMainWindow):
         self.dayBookAdded.setDate(dt.strptime(date_added, '%Y-%m-%d'))
         self.cmbBookCategory.setCurrentText(book_category.capitalize())
 
+        self.bookIdDetails.setReadOnly(True)
+        self.btnSaveBook.setText('Update')
+
+    def remove_selected_book(self):
+        book_id = self.tblBooks.item(self.tblBooks.currentRow(), 0).text().upper()
+        if remove_book(book_id):
+            success_message('Book removed Successifully', 'Book removed')
+            self.populate_book_table()
+            self.populate_borrow_book_table()
+        else:
+            error_message('Cant remove book', 'Error!')
+
     # ================================= book borrowed menu actions ================================
     def book_return(self):
         lib_no = self.tblBorrow.item(self.tblBorrow.currentRow(), 0).text()
@@ -669,6 +753,8 @@ class Ui(QtWidgets.QMainWindow):
             self.pages.setCurrentWidget(self.pgSettings)
         elif currentButton.objectName() == 'btnReport':
             self.pages.setCurrentWidget(self.pgReport)
+        elif currentButton.objectName() == 'btnHistory':
+            self.pages.setCurrentWidget(self.pgHistory)
 
         self.previousButton.setStyleSheet('padding-left:10px;\npadding-right:5px;')
 
@@ -699,14 +785,26 @@ class Ui(QtWidgets.QMainWindow):
         graph = self.create_graph()
 
         self.vbox.addStretch()
-        self.vbox.insertWidget(self.vbox.count() - 1, graph)
+        index = self.vbox.count() - 1
+        self.vbox.insertWidget(index, graph)
         graph.setMinimumHeight(300)
-        pen = pg.mkPen(color=(255, 0, 0))
-        graph.plot(pos=np.array(result))
+        graph.plot(x=graph_axis[0], y=graph_axis[1])
         graph.setBackground('w')
         graph.setTitle(f'<u style = "color: blue; font-size:10em;">Graph for {book_name} class/ form {form_class}</u>')
+        graph.setContextMenuPolicy(Qt.CustomContextMenu)
 
-        graph.setLabel('left', "<span style=\"color:red\">Number of books borrowed (°C)</span>")
+        def my_menu(position):
+            menu = QMenu()
+            menu.addAction('Delete', delete)
+            menu.exec_(graph.mapToGlobal(position))
+
+        def delete():
+            k = self.vbox.indexOf(graph)
+            self.vbox.itemAt(k).widget().deleteLater()
+
+        graph.customContextMenuRequested.connect(my_menu)
+
+        graph.setLabel('left', "<span style=\"color:red\">Number of books borrowed</span>")
         graph.setLabel('bottom', "<span style=\"color:red;\">Dates</span>")
         graph.showGrid(x=True, y=True)
 
@@ -722,7 +820,7 @@ class Ui(QtWidgets.QMainWindow):
         table.setColumnCount(len(columns))
         table.setHorizontalHeaderLabels(columns)
 
-# ================================= fields customisation ========================================
+    # ================================= fields customisation ========================================
     # ========================= reporting section =============================================
     def set_min_and_max_date(self):
         date_list = get_date_list(borrowing_history(), 3)
@@ -733,7 +831,7 @@ class Ui(QtWidgets.QMainWindow):
         self.onDate.setMinimumDate(max(date_list))
         self.onDate.setMaximumDate(max(date_list))
 
-# ============================= Authentication ====================================================
+    # ============================= Authentication ====================================================
     def login(self):
         dlg = Login(self)
         self.setWindowOpacity(0)
@@ -755,9 +853,11 @@ class Ui(QtWidgets.QMainWindow):
 # =========================== running the app =====================================
 def main():
     app = QtWidgets.QApplication(sys.argv)
+    app.setStyle('Windows')
     Ui()
     app.exec_()
 
 
+# ========= Run the main function ===========
 if __name__ == '__main__':
     main()

@@ -73,8 +73,8 @@ def one_to_two_lists(old_list):
     list_index_0 = []
     list_index_1 = []
     for item in old_list:
-        list_index_0.append(dt.strptime(item[0], '%Y-%m-%d'))
-        list_index_1.append(dt.date((item[1])))
+        list_index_0.append(float(dt.strptime(item[0], '%Y-%m-%d').strftime('%m.%d')))
+        list_index_1.append(int(item[1]))
     return [list_index_0, list_index_1]
 
 

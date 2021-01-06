@@ -59,3 +59,13 @@ def all_books():
     sql = '''select book_id,book_name,book_category, date_added from book'''
     book_list = cursor.execute(sql).fetchall()
     return book_list
+
+
+def remove_book(book_id):
+    sql = '''delete from book where book_id = ?'''
+    if cursor.execute(sql, [book_id]):
+        connection.commit()
+        return True
+    else:
+        return False
+

@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="images">
+    <file>ancient-scroll.png</file>
+    <file>filter-filled-tool-symbol.png</file>
     <file>exit.png</file>
     <file>enter.png</file>
     <file>statistics.png</file>

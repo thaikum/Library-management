@@ -102,3 +102,16 @@ def borrowing_history():
              borrow[5], borrow[6]])
 
     return new_borrow_list
+
+
+def history():
+    sql = '''select bb.lib_no, l.first_name || ' ' || l.second_name || ' ' || other_name as student_name, 
+            bb.book_id, b.book_name, strftime('%d-%m-%Y',bb.date_borrowed), strftime('%d-%m-%Y',bb.return_date)
+            from book_borrow bb
+            join lib_user l on bb.lib_no = l.lib_no
+            join book b on bb.book_id = b.book_id'''
+    try:
+        hist = cursor.execute(sql).fetchall()
+        return True, hist
+    except Exception as e:
+        return False, e
