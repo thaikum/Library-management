@@ -35,7 +35,8 @@
    <string>Kambirwa Primary School Community Library</string>
   </property>
   <property name="styleSheet">
-   <string notr="true"/>
+   <string notr="true">color:white;
+background: #141301;</string>
   </property>
   <property name="tabShape">
    <enum>QTabWidget::Rounded</enum>
@@ -57,10 +58,25 @@
     <enum>Qt::LeftToRight</enum>
    </property>
    <property name="styleSheet">
-    <string notr="true">
+    <string notr="true">#centralwidget {
+	background: #141301;
+}
 
-#centralwidget {
-	background: #FFBC54;
+#pages * {
+	background:#141301;
+	color:white;
+}
+
+#pages QPushButton {
+	background: #332905;
+	border-color: rgba(255,255,255,0.7);
+	border-width: 1px;
+	border-style: solid;
+	border-radius: 3px;
+	padding: 5px;
+}
+#pages QPushButton:pressed{
+	background:rgba(0,0,0,0.2);
 }
 
 QLineEdit {
@@ -72,17 +88,17 @@ QLineEdit {
     color:black;
 }
 
-QLineEdit[readOnly=&quot;true&quot;] {
-	border-color:red;
-} 
+
+QPushButton, QTableWidget {
+	background: #542344;
+}
 
 QPushButton:focus {
 	outline: 0;
 }
 
 QPushButton:hover {
-    background-color:red;
-    color:black;
+    background-color:#110314;
     font-weight:bold;
 }
 
@@ -110,8 +126,23 @@ QTableWidget {
 	</string>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_11">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
     <item>
-     <widget class="QWidget" name="horizontalWidget" native="true">
+     <widget class="QWidget" name="menuBar" native="true">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
@@ -128,9 +159,15 @@ QTableWidget {
        <bool>false</bool>
       </property>
       <property name="styleSheet">
-       <string notr="true"/>
+       <string notr="true">#menuBar {
+	margin: 0px;
+}
+
+#menuBar QPushButton{
+	margin:0px;
+}</string>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0,0,0,0,0,0,0">
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0,0,0,0,0,0">
        <property name="spacing">
         <number>0</number>
        </property>
@@ -497,50 +534,6 @@ font-size:13px;</string>
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QPushButton" name="btnSettings">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>40</width>
-           <height>38</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>16</pointsize>
-          </font>
-         </property>
-         <property name="toolTip">
-          <string comment="Hello world" extracomment="Settings"/>
-         </property>
-         <property name="toolTipDuration">
-          <number>30</number>
-         </property>
-         <property name="accessibleName">
-          <string>hello_world</string>
-         </property>
-         <property name="autoFillBackground">
-          <bool>false</bool>
-         </property>
-         <property name="styleSheet">
-          <string notr="true"/>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="icon">
-          <iconset>
-           <normalon>../../../../../../../../../../.designer/backup/settings2.svg</normalon>
-          </iconset>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
     </item>
@@ -572,10 +565,10 @@ font-size:13px;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">font-size:15px;
-</string>
+margin:0px;</string>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="pgLibSession">
        <property name="sizePolicy">
@@ -585,6 +578,21 @@ font-size:13px;</string>
         </sizepolicy>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="1,2">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
         <item>
          <widget class="QFrame" name="frame">
           <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0,0,2">
@@ -637,6 +645,9 @@ margin-bottom:10px;
 padding-left:3px;
 color:black;
 </string>
+               </property>
+               <property name="clearButtonEnabled">
+                <bool>false</bool>
                </property>
               </widget>
              </item>
@@ -2388,7 +2399,6 @@ font-size:16px;
   <tabstop>pushButton_18</tabstop>
   <tabstop>pushButton_19</tabstop>
   <tabstop>dayBookAdded</tabstop>
-  <tabstop>btnSettings</tabstop>
   <tabstop>tblStaff</tabstop>
   <tabstop>txtStaffSearch</tabstop>
   <tabstop>pushButton_28</tabstop>

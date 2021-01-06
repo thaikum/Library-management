@@ -83,13 +83,11 @@ class BlacklistReason(QDialog):
 
 def success_message(message, box_title):
     msg = QMessageBox(QMessageBox.Information, box_title, message)
-    msg.setStyleSheet('background-color:#800000;color:white;font-size:15px')
     msg.exec_()
 
 
 def error_message(message, box_title):
     msg = QMessageBox(QMessageBox.Critical, box_title, message)
-    msg.setStyleSheet('background-color:#800000;color:white;font-size:15px')
     msg.exec_()
 
 
@@ -158,7 +156,6 @@ class Ui(QtWidgets.QMainWindow):
         self.ui.btnLibSession.clicked.connect(lambda: self.activeButton(self.btnLibSession))
         self.ui.btnStudents.clicked.connect(lambda: self.activeButton(self.btnStudents))
         self.ui.btnStaff.clicked.connect(lambda: self.activeButton(self.btnStaff))
-        self.ui.btnSettings.clicked.connect(lambda: self.activeButton(self.btnSettings))
         self.ui.btnReport.clicked.connect(lambda: self.activeButton(self.btnReport))
         self.ui.btnHistory.clicked.connect(lambda: self.activeButton(self.btnHistory))
 
@@ -191,14 +188,9 @@ class Ui(QtWidgets.QMainWindow):
         self.btnLibSession.setIcon(self.icon('fa5s.book-reader', scale=1.3))
         self.btnStudents.setIcon(self.icon('fa5s.user-graduate', scale=1.3))
         self.btnStaff.setIcon(self.icon('fa5s.user-secret', scale=1.3))
-        spin_icon = qta.icon('fa5s.cog', color='white', animation=qta.Spin(self.btnSettings))
-        self.btnSettings.setIcon(spin_icon)
         self.btnUsers.setIcon(self.icon("fa5s.user"))
 
         # ====================== additional ui customisation ========================
-        self.btnSettings.setText('')
-        self.btnSettings.setToolTip('Settings')
-
         self.btnUsers.setText('')
 
         # =======================vertical box ======================================
@@ -310,15 +302,16 @@ class Ui(QtWidgets.QMainWindow):
         std_class = ui.txtStdClass.text()
         stream = ui.txtStdStream.text().upper()
 
-        if not lib_no:
-            details = add_lib_user(fname, sname, oname, user_type, std_class=std_class, stream=stream)
+        if fname and sname:
+            if not lib_no:
+                details = add_lib_user(fname, sname, oname, user_type, std_class=std_class, stream=stream)
 
-        else:
-            details = add_lib_user(fname, sname, oname, user_type, std_class=std_class, stream=stream, lib_no=lib_no)
+            else:
+                details = add_lib_user(fname, sname, oname, user_type, std_class=std_class, stream=stream, lib_no=lib_no)
 
-        if details:
-            ui.clearStudentDetails.click()
-            self.populate_student_table()
+            if details:
+                ui.clearStudentDetails.click()
+                self.populate_student_table()
 
     def new_staff(self):
         ui = self.ui
@@ -330,23 +323,24 @@ class Ui(QtWidgets.QMainWindow):
         user_type = 'STAFF'
         phone_no = ui.stfPhoneNo.text()
 
-        if lib_no:
-            details = add_lib_user(fname, sname, oname, user_type, phone_no=phone_no, lib_no=lib_no)
-            if details:
-                success_message('staff details updated successfully', 'Details updated')
-                self.populate_staff_table()
-                self.clearStaffDetails.click()
-                self.populate_borrow_book_table()
+        if fname and sname:
+            if lib_no:
+                details = add_lib_user(fname, sname, oname, user_type, phone_no=phone_no, lib_no=lib_no)
+                if details:
+                    success_message('staff details updated successfully', 'Details updated')
+                    self.populate_staff_table()
+                    self.clearStaffDetails.click()
+                    self.populate_borrow_book_table()
+
+                else:
+                    error_message('An internal error occurred \nPlease contact admin for more details', 'Could not update')
 
             else:
-                error_message('An internal error occurred \nPlease contact admin for more details', 'Could not update')
+                details = add_lib_user(fname, sname, oname, user_type, phone_no=phone_no)
 
-        else:
-            details = add_lib_user(fname, sname, oname, user_type, phone_no=phone_no)
-
-            if details:
-                ui.clearStaffDetails.click()
-                self.populate_staff_table()
+                if details:
+                    ui.clearStaffDetails.click()
+                    self.populate_staff_table()
 
     def add_new_book(self):
         book_id = self.bookIdDetails.text().upper()
@@ -354,18 +348,19 @@ class Ui(QtWidgets.QMainWindow):
         date_added = self.dayBookAdded.date().toPyDate()
         book_category = self.cmbBookCategory.currentText().upper()
 
-        if self.bookIdDetails.isReadOnly():
-            if book_update(book_id, book_name, date_added, book_category):
-                success_message('Book details update successfully', 'Book updated')
-                self.clearBookDetails.click()
-                self.populate_book_table()
-                self.populate_borrow_book_table()
-            else:
-                error_message('Book details cannot be updated', 'Cant update')
-                self.clearBookDetails.click()
+        if book_id and book_name and book_category != '-SELECT':
+            if self.bookIdDetails.isReadOnly():
+                if book_update(book_id, book_name, date_added, book_category):
+                    success_message('Book details update successfully', 'Book updated')
+                    self.clearBookDetails.click()
+                    self.populate_book_table()
+                    self.populate_borrow_book_table()
+                else:
+                    error_message('Book details cannot be updated', 'Cant update')
+                    self.clearBookDetails.click()
 
-        else:
-            success = new_book(book_id, book_name, date_added, book_category)
+            else:
+                success = new_book(book_id, book_name, date_added, book_category)
 
             if success:
                 self.clearBookDetails.click()
@@ -749,8 +744,6 @@ class Ui(QtWidgets.QMainWindow):
             self.pages.setCurrentWidget(self.pgStudents)
         elif currentButton.objectName() == 'btnStaff':
             self.pages.setCurrentWidget(self.pgStaff)
-        elif currentButton.objectName() == 'btnSettings':
-            self.pages.setCurrentWidget(self.pgSettings)
         elif currentButton.objectName() == 'btnReport':
             self.pages.setCurrentWidget(self.pgReport)
         elif currentButton.objectName() == 'btnHistory':
@@ -758,7 +751,7 @@ class Ui(QtWidgets.QMainWindow):
 
         self.previousButton.setStyleSheet('padding-left:10px;\npadding-right:5px;')
 
-        currentButton.setStyleSheet('padding-left:10px;border:none;padding-right:5px;')
+        currentButton.setStyleSheet('padding-left:10px;border:none;padding-right:5px;background:none;')
         self.previousButton = currentButton
 
     # ================================== Reporting section ==========================================
@@ -853,7 +846,7 @@ class Ui(QtWidgets.QMainWindow):
 # =========================== running the app =====================================
 def main():
     app = QtWidgets.QApplication(sys.argv)
-    app.setStyle('Windows')
+    app.setStyle('Fusion')
     Ui()
     app.exec_()
 
