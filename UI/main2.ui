@@ -34,6 +34,11 @@
   <property name="windowTitle">
    <string>Kambirwa Primary School Community Library</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normalon>:/images/logo2.png</normalon>
+   </iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true">color:white;
 background: #141301;</string>
@@ -568,7 +573,7 @@ font-size:13px;</string>
 margin:0px;</string>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>6</number>
       </property>
       <widget class="QWidget" name="pgLibSession">
        <property name="sizePolicy">
@@ -1798,18 +1803,17 @@ color:black;
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_7">
              <item>
-              <widget class="QPushButton" name="pushButton_6">
-               <property name="text">
-                <string>Delete</string>
+              <spacer name="horizontalSpacer_13">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
                </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_8">
-               <property name="text">
-                <string>Promote</string>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
                </property>
-              </widget>
+              </spacer>
              </item>
              <item>
               <widget class="QPushButton" name="clearStudentDetails">
@@ -2389,8 +2393,6 @@ font-size:16px;
   <tabstop>tblStudent</tabstop>
   <tabstop>txtStudentSearch</tabstop>
   <tabstop>btnPromoteAll</tabstop>
-  <tabstop>pushButton_6</tabstop>
-  <tabstop>pushButton_8</tabstop>
   <tabstop>clearStudentDetails</tabstop>
   <tabstop>btnSaveStd</tabstop>
   <tabstop>btnLibSession</tabstop>

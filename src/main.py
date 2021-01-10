@@ -5,9 +5,9 @@ import numpy
 import pyqtgraph as pg
 
 import qtawesome as qta
-from PyQt5 import QtWidgets, uic
+from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QMenu, QDialog, QMessageBox, QWidget, QVBoxLayout, QCompleter
 
 from src.book import *
 from src.book_borrow import *
@@ -21,7 +21,7 @@ from Interface.updateprofile import UpdateProfileUi
 from Interface.BlacklistingDialog import BlacklistingReasonUi
 
 
-class ChangePassword(QDialog):
+class ChangePassword(QDialog, PasswordChangeUi):
     def __init__(self, *args, **kwargs):
         self.lib_no = kwargs.get('lib_no')
         del kwargs['lib_no']
@@ -53,7 +53,7 @@ class ChangePassword(QDialog):
             error_message('fix the errors displayed above first!', 'Fix errors first')
 
 
-class UpdateProfile(QDialog):
+class UpdateProfile(QDialog, UpdateProfileUi):
     def __init__(self, *args, **kwargs):
         self.lib_no = kwargs.get('lib_no')
         del kwargs['lib_no']
@@ -88,11 +88,11 @@ class UpdateProfile(QDialog):
             error_message('Internal error occurred', 'Internal, error')
 
 
-class BlacklistReason(QDialog):
+class BlacklistReason(QDialog, BlacklistingReasonUi):
     def __init__(self, *args, **kwargs):
         super(BlacklistReason, self).__init__(*args, **kwargs)
         self.ui = BlacklistingReasonUi()
-        # self.setupUi(self)
+        self.setupUi(self)
 
 
 def success_message(message, box_title):
