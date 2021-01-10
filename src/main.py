@@ -1,6 +1,7 @@
 import string
 import sys
 import time
+import numpy
 import pyqtgraph as pg
 
 import qtawesome as qta
@@ -13,14 +14,23 @@ from src.book_borrow import *
 from src.helper import *
 from src.lib_user import *
 from src import resources
+from Interface.main import MainUi
+from Interface.passwordchange import PasswordChangeUi
+from Interface.login import LoginUi
+from Interface.updateprofile import UpdateProfileUi
+from Interface.BlacklistingDialog import BlacklistingReasonUi
 
 
 class ChangePassword(QDialog):
     def __init__(self, *args, **kwargs):
         self.lib_no = kwargs.get('lib_no')
         del kwargs['lib_no']
+        
         super(ChangePassword, self).__init__(*args, **kwargs)
-        self.ui = uic.loadUi('../UI/passwordchange.ui', self)
+
+        self.ui = PasswordChangeUi()
+        self.setupUi(self)
+        
         self.changeConfirmPassword.textChanged.connect(lambda: password_matcher(self.changePasswordError,
                                                                                 self.changeNewPassword,
                                                                                 self.changeConfirmPassword))
@@ -47,8 +57,11 @@ class UpdateProfile(QDialog):
     def __init__(self, *args, **kwargs):
         self.lib_no = kwargs.get('lib_no')
         del kwargs['lib_no']
+
         super(UpdateProfile, self).__init__(*args, **kwargs)
-        self.ui = uic.loadUi('../UI/updateprofile.ui', self)
+        self.ui = UpdateProfileUi()
+        self.setupUi(self)
+        
         self.btnUpdateProfile.clicked.connect(self.update)
         self.pre_fill()
 
@@ -78,7 +91,8 @@ class UpdateProfile(QDialog):
 class BlacklistReason(QDialog):
     def __init__(self, *args, **kwargs):
         super(BlacklistReason, self).__init__(*args, **kwargs)
-        self.ui = uic.loadUi('../UI/BlacklistingDialog.ui', self)
+        self.ui = BlacklistingReasonUi()
+        # self.setupUi(self)
 
 
 def success_message(message, box_title):
@@ -91,10 +105,11 @@ def error_message(message, box_title):
     msg.exec_()
 
 
-class Login(QDialog):
+class Login(QDialog, LoginUi):
     def __init__(self, *args, **kwargs):
         super(Login, self).__init__(*args, **kwargs)
-        self.ui = uic.loadUi('../UI/login.ui', self)
+        self.ui = LoginUi()
+        self.setupUi(self)
 
         # ======================== pages ====================================================
         self.btnLogin.clicked.connect(self.authenticate)
@@ -130,7 +145,7 @@ class Login(QDialog):
             self.show_sign_up_error(result[1])
 
 
-class Ui(QtWidgets.QMainWindow):
+class Ui(QtWidgets.QMainWindow, MainUi):
     can_borrow = False
     global_book_list = []
     global_book_borrow_list = []
@@ -142,7 +157,8 @@ class Ui(QtWidgets.QMainWindow):
 
     def __init__(self):
         super(Ui, self).__init__()
-        self.ui = uic.loadUi('../UI/main2.ui', self)
+        self.ui = MainUi()
+        self.setupUi(self)
 
         # ================================== login ================================
         self.login()
@@ -152,36 +168,36 @@ class Ui(QtWidgets.QMainWindow):
 
         self.activeButton(self.btnLibSession)  # default page
 
-        self.ui.btnBooks.clicked.connect(lambda: self.activeButton(self.btnBooks))
-        self.ui.btnLibSession.clicked.connect(lambda: self.activeButton(self.btnLibSession))
-        self.ui.btnStudents.clicked.connect(lambda: self.activeButton(self.btnStudents))
-        self.ui.btnStaff.clicked.connect(lambda: self.activeButton(self.btnStaff))
-        self.ui.btnReport.clicked.connect(lambda: self.activeButton(self.btnReport))
-        self.ui.btnHistory.clicked.connect(lambda: self.activeButton(self.btnHistory))
+        self.btnBooks.clicked.connect(lambda: self.activeButton(self.btnBooks))
+        self.btnLibSession.clicked.connect(lambda: self.activeButton(self.btnLibSession))
+        self.btnStudents.clicked.connect(lambda: self.activeButton(self.btnStudents))
+        self.btnStaff.clicked.connect(lambda: self.activeButton(self.btnStaff))
+        self.btnReport.clicked.connect(lambda: self.activeButton(self.btnReport))
+        self.btnHistory.clicked.connect(lambda: self.activeButton(self.btnHistory))
 
         # ============================== Saving data to the database ===============================
-        self.ui.btnSaveStd.clicked.connect(self.new_student)
-        self.ui.stfSaveDetails.clicked.connect(self.new_staff)
-        self.ui.btnSaveBook.clicked.connect(self.add_new_book)
-        self.ui.btnBorrowBook.clicked.connect(self.new_book_borrow)
+        self.btnSaveStd.clicked.connect(self.new_student)
+        self.stfSaveDetails.clicked.connect(self.new_staff)
+        self.btnSaveBook.clicked.connect(self.add_new_book)
+        self.btnBorrowBook.clicked.connect(self.new_book_borrow)
 
         # ================== Some constraints to enable/disable buttons ===========================
         self.txtLibNoBorrow.editingFinished.connect(self.validate_lib_user)
         self.txtBookIdBorrow.editingFinished.connect(self.validate_book)
 
         # ================= Minimum date =========================================================
-        self.ui.dtReturnDateBorrow.setMinimumDate(dt.today())
-        self.ui.dayBookAdded.setMinimumDate(dt.today())
+        self.dtReturnDateBorrow.setMinimumDate(dt.today())
+        self.dayBookAdded.setMinimumDate(dt.today())
 
         # ==================== ui text initialization ===========================================
         self.show_book_borrow_error('')
 
         # ====================== context menu ========================================
-        self.ui.tblBorrow.customContextMenuRequested.connect(self.borrow_table_menu)
-        self.ui.tblBooks.customContextMenuRequested.connect(self.book_table_menu)
-        self.ui.tblReport.customContextMenuRequested.connect(self.report_table_menu)
-        self.ui.tblStaff.customContextMenuRequested.connect(self.staff_table_menu)
-        self.ui.tblStudent.customContextMenuRequested.connect(self.student_table_menu)
+        self.tblBorrow.customContextMenuRequested.connect(self.borrow_table_menu)
+        self.tblBooks.customContextMenuRequested.connect(self.book_table_menu)
+        self.tblReport.customContextMenuRequested.connect(self.report_table_menu)
+        self.tblStaff.customContextMenuRequested.connect(self.staff_table_menu)
+        self.tblStudent.customContextMenuRequested.connect(self.student_table_menu)
 
         # ======================= setting icons ======================================
         self.btnBooks.setIcon(self.icon('fa5s.book', scale=1.3))
@@ -293,7 +309,7 @@ class Ui(QtWidgets.QMainWindow):
         self.showMaximized()
 
     def new_student(self):
-        ui = self.ui
+        ui = self
         lib_no = ui.txtNewLibNo.text().upper()
         fname = ui.txtStdFname.text().upper()
         sname = ui.txtStdSname.text().upper()
@@ -314,7 +330,7 @@ class Ui(QtWidgets.QMainWindow):
                 self.populate_student_table()
 
     def new_staff(self):
-        ui = self.ui
+        ui = self
 
         lib_no = ui.stfLibNo.text().upper()
         fname = ui.stfFirstName.text().upper()
@@ -369,7 +385,7 @@ class Ui(QtWidgets.QMainWindow):
                 error_message('A book with such details exists', 'Book exists!')
 
     def new_book_borrow(self):
-        ui = self.ui
+        ui = self
         lib_no = ui.txtLibNoBorrow.text().upper()
         book_id = ui.txtBookIdBorrow.text().upper()
         return_date = ui.dtReturnDateBorrow.date().toPyDate()
@@ -388,7 +404,7 @@ class Ui(QtWidgets.QMainWindow):
     # ============================= populate tables functions =========================================
 
     def populate_student_table(self):
-        ui = self.ui
+        ui = self
 
         students = all_students()
         self.global_student_list = students
@@ -396,7 +412,7 @@ class Ui(QtWidgets.QMainWindow):
         self.insert_into_table(ui.tblStudent, students)
 
     def populate_staff_table(self):
-        ui = self.ui
+        ui = self
         staff = all_staff(user_type=self.logged_user_type)
         self.global_staff_list = staff
 
@@ -404,7 +420,7 @@ class Ui(QtWidgets.QMainWindow):
         self.autocomplete(ui.txtLibNoBorrow, list_to_string(staff, 0))
 
     def populate_book_table(self):
-        ui = self.ui
+        ui = self
 
         books = all_books()
         self.global_book_list = books
@@ -413,7 +429,7 @@ class Ui(QtWidgets.QMainWindow):
         self.insert_into_table(ui.tblBooks, books)
 
     def populate_borrow_book_table(self):
-        ui = self.ui
+        ui = self
         borrows = all_borrows()
         self.global_book_borrow_list = borrows
         self.set_min_and_max_date()
@@ -451,7 +467,7 @@ class Ui(QtWidgets.QMainWindow):
         table.resizeColumnsToContents()
 
     def validate_lib_user(self):
-        ui = self.ui
+        ui = self
         lib_no = ui.txtLibNoBorrow.text().upper()
         lib_user_exists = search_lib_user(lib_no)
         if lib_user_exists:
@@ -465,7 +481,7 @@ class Ui(QtWidgets.QMainWindow):
             ui.btnBorrowBook.setEnabled(False)
 
     def validate_book(self):
-        ui = self.ui
+        ui = self
         book_id = ui.txtBookIdBorrow.text().upper()
         book_available = search_book(book_id)
         if book_available:
@@ -479,7 +495,7 @@ class Ui(QtWidgets.QMainWindow):
 
     def activate_borrow_button(self):
         if self.can_borrow:
-            self.ui.btnBorrowBook.setEnabled(True)
+            self.btnBorrowBook.setEnabled(True)
             self.show_book_borrow_error('')
         else:
             self.show_book_borrow_error('Please ensure that all data provided is correct !!!')
@@ -487,11 +503,11 @@ class Ui(QtWidgets.QMainWindow):
 
     def show_book_borrow_error(self, error):
         if error:
-            self.ui.lblBookBorrowError.setStyleSheet('color:red;\nbackground-color:white;\nborder-radius:4px;')
-            self.ui.lblBookBorrowError.setText(error)
+            self.lblBookBorrowError.setStyleSheet('color:red;\nbackground-color:white;\nborder-radius:4px;')
+            self.lblBookBorrowError.setText(error)
         else:
-            self.ui.lblBookBorrowError.setStyleSheet('')
-            self.ui.lblBookBorrowError.setText('')
+            self.lblBookBorrowError.setStyleSheet('')
+            self.lblBookBorrowError.setText('')
 
     def autocomplete(self, lineedit, data):
         completer = QCompleter(data)
@@ -515,7 +531,7 @@ class Ui(QtWidgets.QMainWindow):
         removeRow.setIcon(removeIcon)
         removeRow.setShortcut('ctrl+r')
 
-        action = menu.exec_(self.ui.tblBorrow.mapToGlobal(position))
+        action = menu.exec_(self.tblBorrow.mapToGlobal(position))
         if action == removeRow:
             self.book_return()
 
@@ -529,7 +545,7 @@ class Ui(QtWidgets.QMainWindow):
             menu.addAction(qta.icon('fa5s.ban', color='red'), 'Blacklist', lambda: self.blacklist_user(lib_no))
         menu.addAction(qta.icon('fa5s.arrow-up'), 'Promote class', lambda: self.promote_indv_student(lib_no))
         menu.addAction(qta.icon('fa5s.arrow-down'), 'demote class', lambda: self.demote_indv_student(lib_no))
-        menu.exec_(self.ui.tblStudent.mapToGlobal(position))
+        menu.exec_(self.tblStudent.mapToGlobal(position))
 
     def book_table_menu(self, position):
         menu = QMenu()
@@ -547,7 +563,7 @@ class Ui(QtWidgets.QMainWindow):
         else:
             menu.addAction(qta.icon('fa5s.ban', color='red'), "blacklist", lambda: self.blacklist(book_id), 'ctrl+l')
 
-        menu.exec_(self.ui.tblBooks.mapToGlobal(position))
+        menu.exec_(self.tblBooks.mapToGlobal(position))
 
     def staff_table_menu(self, position):
         menu = QMenu()
@@ -567,12 +583,12 @@ class Ui(QtWidgets.QMainWindow):
 
         menu.addAction(self.icon('fa5.edit', color='black'), 'Edit details', self.edit_staff_details)
 
-        menu.exec_(self.ui.tblStaff.mapToGlobal(position))
+        menu.exec_(self.tblStaff.mapToGlobal(position))
 
     def report_table_menu(self, position):
         menu = QMenu()
         menu.addAction('View graph', self.create_book_usage_graph)
-        menu.exec_(self.ui.tblReport.mapToGlobal(position))
+        menu.exec_(self.tblReport.mapToGlobal(position))
 
     # ============================== Menu actions ====================================================
     # ===================================== student menu action ===================================

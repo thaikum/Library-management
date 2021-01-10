@@ -215,7 +215,7 @@ padding-right:5px;</string>
          </property>
          <property name="icon">
           <iconset theme="icon.jpg">
-           <normaloff>../../../../../../../../../../../../../../../.designer/backup</normaloff>../../../../../../../../../../../../../../../.designer/backup</iconset>
+           <normaloff>../../../../../.designer/backup</normaloff>../../../../../.designer/backup</iconset>
          </property>
          <property name="autoDefault">
           <bool>true</bool>
@@ -739,8 +739,6 @@ color:black;
                <property name="font">
                 <font>
                  <pointsize>-1</pointsize>
-                 <weight>75</weight>
-                 <bold>true</bold>
                 </font>
                </property>
                <property name="styleSheet">
@@ -854,14 +852,17 @@ color:black;
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_3">
-               <property name="styleSheet">
-                <string notr="true">font-size:14px;</string>
+              <spacer name="horizontalSpacer_8">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
                </property>
-               <property name="text">
-                <string>filter</string>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
                </property>
-              </widget>
+              </spacer>
              </item>
             </layout>
            </item>
@@ -909,11 +910,11 @@ color:black;
              <attribute name="horizontalHeaderCascadingSectionResizes">
               <bool>true</bool>
              </attribute>
-             <attribute name="horizontalHeaderMinimumSectionSize">
-              <number>50</number>
-             </attribute>
              <attribute name="horizontalHeaderDefaultSectionSize">
               <number>100</number>
+             </attribute>
+             <attribute name="horizontalHeaderMinimumSectionSize">
+              <number>50</number>
              </attribute>
              <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
               <bool>true</bool>
@@ -1242,14 +1243,17 @@ color:black;
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="pushButton_28">
-                <property name="styleSheet">
-                 <string notr="true">font-size:14px;</string>
+               <spacer name="horizontalSpacer_9">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
                 </property>
-                <property name="text">
-                 <string>filter</string>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
                 </property>
-               </widget>
+               </spacer>
               </item>
              </layout>
             </widget>
@@ -1296,23 +1300,22 @@ color:black;
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_26">
              <item>
+              <spacer name="horizontalSpacer_12">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
               <widget class="QPushButton" name="pushButton_31">
                <property name="text">
                 <string>Clear</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_30">
-               <property name="text">
-                <string>Delete</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_29">
-               <property name="text">
-                <string>Blacklist</string>
                </property>
               </widget>
              </item>
@@ -1343,8 +1346,8 @@ color:black;
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>540</width>
-             <height>428</height>
+             <width>545</width>
+             <height>439</height>
             </rect>
            </property>
           </widget>
@@ -1901,11 +1904,17 @@ font-size:16px;
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="btnStudentFilter">
-               <property name="text">
-                <string>Filter</string>
+              <spacer name="horizontalSpacer_10">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
                </property>
-              </widget>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
              </item>
             </layout>
            </item>
@@ -2329,23 +2338,22 @@ font-size:16px;
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_18">
              <item>
+              <spacer name="horizontalSpacer_11">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
               <widget class="QPushButton" name="pushButton_19">
                <property name="text">
                 <string> Clear Table</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_18">
-               <property name="text">
-                <string>Delete</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_17">
-               <property name="text">
-                <string>Blacklist</string>
                </property>
               </widget>
              </item>
@@ -2372,7 +2380,6 @@ font-size:16px;
   <tabstop>txtBookIdBorrow</tabstop>
   <tabstop>dtReturnDateBorrow</tabstop>
   <tabstop>btnBorrowBook</tabstop>
-  <tabstop>pushButton_3</tabstop>
   <tabstop>tblBorrow</tabstop>
   <tabstop>txtStdFname</tabstop>
   <tabstop>txtStdSname</tabstop>
@@ -2381,7 +2388,6 @@ font-size:16px;
   <tabstop>txtStdStream</tabstop>
   <tabstop>tblStudent</tabstop>
   <tabstop>txtStudentSearch</tabstop>
-  <tabstop>btnStudentFilter</tabstop>
   <tabstop>btnPromoteAll</tabstop>
   <tabstop>pushButton_6</tabstop>
   <tabstop>pushButton_8</tabstop>
@@ -2395,15 +2401,10 @@ font-size:16px;
   <tabstop>tblBooks</tabstop>
   <tabstop>txtBookSearch</tabstop>
   <tabstop>btnStudentFilter_2</tabstop>
-  <tabstop>pushButton_17</tabstop>
-  <tabstop>pushButton_18</tabstop>
   <tabstop>pushButton_19</tabstop>
   <tabstop>dayBookAdded</tabstop>
   <tabstop>tblStaff</tabstop>
   <tabstop>txtStaffSearch</tabstop>
-  <tabstop>pushButton_28</tabstop>
-  <tabstop>pushButton_29</tabstop>
-  <tabstop>pushButton_30</tabstop>
   <tabstop>pushButton_31</tabstop>
   <tabstop>bookIdDetails</tabstop>
   <tabstop>txtUserNameBorrow</tabstop>
@@ -2437,6 +2438,70 @@ font-size:16px;
   <connection>
    <sender>clearStudentDetails</sender>
    <signal>clicked()</signal>
+   <receiver>txtStdOname</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>105</x>
+     <y>79</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>105</x>
+     <y>79</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearBookDetails</sender>
+   <signal>clicked()</signal>
+   <receiver>bookIdDetails</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>36</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>310</x>
+     <y>117</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearStaffDetails</sender>
+   <signal>clicked()</signal>
+   <receiver>stfPhoneNo</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>263</x>
+     <y>310</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>322</x>
+     <y>268</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearStaffDetails</sender>
+   <signal>clicked()</signal>
+   <receiver>stfFirstName</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>263</x>
+     <y>310</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>348</x>
+     <y>160</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearStudentDetails</sender>
+   <signal>clicked()</signal>
    <receiver>txtNewLibNo</receiver>
    <slot>clear()</slot>
    <hints>
@@ -2454,38 +2519,6 @@ font-size:16px;
    <sender>clearStudentDetails</sender>
    <signal>clicked()</signal>
    <receiver>txtStdFname</receiver>
-   <slot>clear()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>105</x>
-     <y>79</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>105</x>
-     <y>79</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>clearStudentDetails</sender>
-   <signal>clicked()</signal>
-   <receiver>txtStdSname</receiver>
-   <slot>clear()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>105</x>
-     <y>79</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>105</x>
-     <y>79</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>clearStudentDetails</sender>
-   <signal>clicked()</signal>
-   <receiver>txtStdOname</receiver>
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -2563,34 +2596,18 @@ font-size:16px;
    </hints>
   </connection>
   <connection>
-   <sender>clearStaffDetails</sender>
+   <sender>clearStudentDetails</sender>
    <signal>clicked()</signal>
-   <receiver>stfFirstName</receiver>
+   <receiver>txtStdSname</receiver>
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>263</x>
-     <y>310</y>
+     <x>105</x>
+     <y>79</y>
     </hint>
     <hint type="destinationlabel">
-     <x>348</x>
-     <y>160</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>clearStaffDetails</sender>
-   <signal>clicked()</signal>
-   <receiver>stfPhoneNo</receiver>
-   <slot>clear()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>263</x>
-     <y>310</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>322</x>
-     <y>268</y>
+     <x>105</x>
+     <y>79</y>
     </hint>
    </hints>
   </connection>
@@ -2613,22 +2630,6 @@ font-size:16px;
   <connection>
    <sender>clearBookDetails</sender>
    <signal>clicked()</signal>
-   <receiver>dayBookAdded</receiver>
-   <slot>clear()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>62</x>
-     <y>299</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>172</x>
-     <y>187</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>clearBookDetails</sender>
-   <signal>clicked()</signal>
    <receiver>bookNameDetails</receiver>
    <slot>clear()</slot>
    <hints>
@@ -2645,16 +2646,16 @@ font-size:16px;
   <connection>
    <sender>clearBookDetails</sender>
    <signal>clicked()</signal>
-   <receiver>bookIdDetails</receiver>
+   <receiver>dayBookAdded</receiver>
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>36</x>
-     <y>295</y>
+     <x>62</x>
+     <y>299</y>
     </hint>
     <hint type="destinationlabel">
-     <x>310</x>
-     <y>117</y>
+     <x>172</x>
+     <y>187</y>
     </hint>
    </hints>
   </connection>
